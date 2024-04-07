@@ -104,14 +104,14 @@
 /// HTTP cookies.
 #[cfg(feature = "cookies")]
 pub mod cookies {
-	pub use cookie::*;
+    pub use cookie::*;
 }
 
 /// URL records.
 pub mod url {
-	pub use url::{
-		EncodingOverride, Host, OpaqueOrigin, Origin, ParseError, ParseOptions, PathSegmentsMut, Position, SyntaxViolation, Url, UrlQuery,
-	};
+    pub use url::{
+        EncodingOverride, Host, OpaqueOrigin, Origin, ParseError, ParseOptions, PathSegmentsMut, Position, SyntaxViolation, Url, UrlQuery,
+    };
 }
 
 #[macro_use]
@@ -166,23 +166,23 @@ pub use crate::extensions::Extensions;
 #[cfg(feature = "serde")]
 /// Traits for conversions between types.
 pub mod convert {
-	pub use serde::{de::DeserializeOwned, Deserialize, Serialize};
-	#[doc(inline)]
-	pub use serde_json::json;
+    pub use serde::{de::DeserializeOwned, Deserialize, Serialize};
+    #[doc(inline)]
+    pub use serde_json::json;
 }
 
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-	use crate::Error;
-	pub use crate::StatusCode;
-	use core::fmt::{Debug, Display};
-	pub use core::result::Result::Err;
+    use crate::Error;
+    pub use crate::StatusCode;
+    use core::fmt::{Debug, Display};
+    pub use core::result::Result::Err;
 
-	pub fn new_adhoc<M>(message: M) -> Error
-	where
-		M: Display + Debug + Send + Sync + 'static,
-	{
-		Error::new_adhoc(message)
-	}
+    pub fn new_adhoc<M>(message: M) -> Error
+    where
+        M: Display + Debug + Send + Sync + 'static,
+    {
+        Error::new_adhoc(message)
+    }
 }

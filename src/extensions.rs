@@ -37,10 +37,7 @@ impl Extensions {
 
     /// Check if container contains value for type
     pub fn contains<T: 'static>(&self) -> bool {
-        self.map
-            .as_ref()
-            .and_then(|m| m.get(&TypeId::of::<T>()))
-            .is_some()
+        self.map.as_ref().and_then(|m| m.get(&TypeId::of::<T>())).is_some()
     }
 
     /// Get a reference to a value previously inserted on this `Extensions`.

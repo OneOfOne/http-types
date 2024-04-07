@@ -59,20 +59,14 @@ impl MediaTypeProposal {
     /// a `q` value has been set.
     pub(crate) fn from_str(s: &str) -> crate::Result<Self> {
         let mut media_type = Mime::from_str(s)?;
-        let weight = media_type
-            .remove_param("q")
-            .map(|param| param.as_str().parse())
-            .transpose()?;
+        let weight = media_type.remove_param("q").map(|param| param.as_str().parse()).transpose()?;
         Self::new(media_type, weight)
     }
 }
 
 impl From<Mime> for MediaTypeProposal {
     fn from(media_type: Mime) -> Self {
-        Self {
-            media_type,
-            weight: None,
-        }
+        Self { media_type, weight: None }
     }
 }
 

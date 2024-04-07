@@ -140,10 +140,7 @@ impl TryFrom<Headers> for http::HeaderMap {
     }
 }
 
-fn hyperium_headers_to_headers(
-    hyperium_headers: http::HeaderMap,
-    headers: &mut Headers,
-) -> crate::Result<()> {
+fn hyperium_headers_to_headers(hyperium_headers: http::HeaderMap, headers: &mut Headers) -> crate::Result<()> {
     for (name, value) in hyperium_headers {
         let value = value.as_bytes().to_owned();
         let value = unsafe { HeaderValue::from_bytes_unchecked(value) };
@@ -223,9 +220,7 @@ impl From<Response> for http::Response<Body> {
     fn from(mut res: Response) -> Self {
         let status: u16 = res.status().into();
         let version = res.version().map(|v| v.into()).unwrap_or_default();
-        let mut builder = http::response::Builder::new()
-            .status(status)
-            .version(version);
+        let mut builder = http::response::Builder::new().status(status).version(version);
         headers_to_hyperium_headers(res.as_mut(), builder.headers_mut().unwrap());
         let body = res.take_body();
         builder.body(body).unwrap()

@@ -183,9 +183,7 @@ mod test {
     #[test]
     fn bad_request_on_parse_error() {
         let mut headers = Response::new(200);
-        headers
-            .insert_header(STRICT_TRANSPORT_SECURITY, "<nori ate the tag. yum.>")
-            .unwrap();
+        headers.insert_header(STRICT_TRANSPORT_SECURITY, "<nori ate the tag. yum.>").unwrap();
         let err = StrictTransportSecurity::from_headers(headers).unwrap_err();
         assert_eq!(err.status(), 400);
     }
@@ -193,9 +191,7 @@ mod test {
     #[test]
     fn no_panic_on_invalid_number() {
         let mut headers = Response::new(200);
-        headers
-            .insert_header(STRICT_TRANSPORT_SECURITY, "max-age=birds")
-            .unwrap();
+        headers.insert_header(STRICT_TRANSPORT_SECURITY, "max-age=birds").unwrap();
         let err = StrictTransportSecurity::from_headers(headers).unwrap_err();
         assert_eq!(err.status(), 400);
     }
@@ -203,12 +199,8 @@ mod test {
     #[test]
     fn parse_optional_whitespace() {
         let mut headers = Response::new(200);
-        headers
-            .insert_header(STRICT_TRANSPORT_SECURITY, "max-age=30;     preload")
-            .unwrap();
-        let policy = StrictTransportSecurity::from_headers(headers)
-            .unwrap()
-            .unwrap();
+        headers.insert_header(STRICT_TRANSPORT_SECURITY, "max-age=30;     preload").unwrap();
+        let policy = StrictTransportSecurity::from_headers(headers).unwrap().unwrap();
         assert_eq!(policy.max_age, Duration::from_secs(30));
         assert!(policy.preload());
     }

@@ -58,10 +58,7 @@ impl EncodingProposal {
 
 impl From<Encoding> for EncodingProposal {
     fn from(encoding: Encoding) -> Self {
-        Self {
-            encoding,
-            weight: None,
-        }
+        Self { encoding, weight: None }
     }
 }
 

@@ -21,24 +21,24 @@ pub(crate) fn parse_token(input: &str) -> (Option<&str>, &str) {
 /// https://tools.ietf.org/html/rfc7230#section-3.2.6
 fn tchar(c: char) -> bool {
     matches!(
-        c, 'a'..='z'
-            | 'A'..='Z'
-            | '0'..='9'
-            | '!'
-            | '#'
-            | '$'
-            | '%'
-            | '&'
-            | '\''
-            | '*'
-            | '+'
-            | '-'
-            | '.'
-            | '^'
-            | '_'
-            | '`'
-            | '|'
-            | '~'
+          c, 'a'..='z'
+                 | 'A'..='Z'
+                 | '0'..='9'
+                 | '!'
+                 | '#'
+                 | '$'
+                 | '%'
+                 | '&'
+                 | '\''
+                 | '*'
+                 | '+'
+                 | '-'
+                 | '.'
+                 | '^'
+                 | '_'
+                 | '`'
+                 | '|'
+                 | '~'
     )
 }
 
@@ -126,10 +126,7 @@ mod test {
         assert_eq!(parse_token("KEY=value"), (Some("KEY"), "=value"));
         assert_eq!(parse_token("0123)=value"), (Some("0123"), ")=value"));
         assert_eq!(parse_token("a=b"), (Some("a"), "=b"));
-        assert_eq!(
-            parse_token("!#$%&'*+-.^_`|~=value"),
-            (Some("!#$%&'*+-.^_`|~"), "=value",)
-        );
+        assert_eq!(parse_token("!#$%&'*+-.^_`|~=value"), (Some("!#$%&'*+-.^_`|~"), "=value",));
     }
 
     #[test]
@@ -147,17 +144,11 @@ mod test {
 
     #[test]
     fn qstring_successful_parses() {
-        assert_eq!(
-            parse_quoted_string(r#""key"=value"#),
-            (Some(Cow::Borrowed("key")), "=value")
-        );
+        assert_eq!(parse_quoted_string(r#""key"=value"#), (Some(Cow::Borrowed("key")), "=value"));
 
         assert_eq!(
             parse_quoted_string(r#""escaped \" quote \""rest"#),
-            (
-                Some(Cow::Owned(String::from(r#"escaped " quote ""#))),
-                r#"rest"#
-            )
+            (Some(Cow::Owned(String::from(r#"escaped " quote ""#))), r#"rest"#)
         );
     }
 

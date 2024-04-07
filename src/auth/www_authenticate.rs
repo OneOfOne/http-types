@@ -38,126 +38,126 @@ use crate::{auth::AuthenticationScheme, headers::Header};
 /// ```
 #[derive(Debug)]
 pub struct WwwAuthenticate {
-	scheme: AuthenticationScheme,
-	realm: String,
+    scheme: AuthenticationScheme,
+    realm: String,
 }
 
 impl WwwAuthenticate {
-	/// Create a new instance of `WwwAuthenticate`.
-	pub fn new(scheme: AuthenticationScheme, realm: String) -> Self {
-		Self { scheme, realm }
-	}
+    /// Create a new instance of `WwwAuthenticate`.
+    pub fn new(scheme: AuthenticationScheme, realm: String) -> Self {
+        Self { scheme, realm }
+    }
 
-	/// Create a new instance from headers.
-	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-		let headers = match headers.as_ref().get(WWW_AUTHENTICATE) {
-			Some(headers) => headers,
-			None => return Ok(None),
-		};
+    /// Create a new instance from headers.
+    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+        let headers = match headers.as_ref().get(WWW_AUTHENTICATE) {
+            Some(headers) => headers,
+            None => return Ok(None),
+        };
 
-		// If we successfully parsed the header then there's always at least one
-		// entry. We want the last entry.
-		let value = headers.iter().last().unwrap();
+        // If we successfully parsed the header then there's always at least one
+        // entry. We want the last entry.
+        let value = headers.iter().last().unwrap();
 
-		let mut iter = value.as_str().splitn(2, ' ');
-		let scheme = iter.next();
-		let credential = iter.next();
-		let (scheme, realm) = match (scheme, credential) {
-			(None, _) => bail!(400, "Could not find scheme"),
-			(Some(_), None) => bail!(400, "Could not find realm"),
-			(Some(scheme), Some(realm)) => (scheme.parse()?, realm.to_owned()),
-		};
+        let mut iter = value.as_str().splitn(2, ' ');
+        let scheme = iter.next();
+        let credential = iter.next();
+        let (scheme, realm) = match (scheme, credential) {
+            (None, _) => bail!(400, "Could not find scheme"),
+            (Some(_), None) => bail!(400, "Could not find realm"),
+            (Some(scheme), Some(realm)) => (scheme.parse()?, realm.to_owned()),
+        };
 
-		let realm = realm.trim_start();
-		let realm = match realm.strip_prefix(r#"realm=""#) {
-			Some(realm) => realm,
-			None => bail!(400, "realm not found"),
-		};
+        let realm = realm.trim_start();
+        let realm = match realm.strip_prefix(r#"realm=""#) {
+            Some(realm) => realm,
+            None => bail!(400, "realm not found"),
+        };
 
-		let mut chars = realm.chars();
-		let mut closing_quote = false;
-		let realm = (&mut chars)
-			.take_while(|c| {
-				if c == &'"' {
-					closing_quote = true;
-					false
-				} else {
-					true
-				}
-			})
-			.collect();
-		if !closing_quote {
-			bail!(400, r"Expected a closing quote");
-		}
+        let mut chars = realm.chars();
+        let mut closing_quote = false;
+        let realm = (&mut chars)
+            .take_while(|c| {
+                if c == &'"' {
+                    closing_quote = true;
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect();
+        if !closing_quote {
+            bail!(400, r"Expected a closing quote");
+        }
 
-		Ok(Some(Self { scheme, realm }))
-	}
+        Ok(Some(Self { scheme, realm }))
+    }
 
-	/// Get the authorization scheme.
-	pub fn scheme(&self) -> AuthenticationScheme {
-		self.scheme
-	}
+    /// Get the authorization scheme.
+    pub fn scheme(&self) -> AuthenticationScheme {
+        self.scheme
+    }
 
-	/// Set the authorization scheme.
-	pub fn set_scheme(&mut self, scheme: AuthenticationScheme) {
-		self.scheme = scheme;
-	}
+    /// Set the authorization scheme.
+    pub fn set_scheme(&mut self, scheme: AuthenticationScheme) {
+        self.scheme = scheme;
+    }
 
-	/// Get the authorization realm.
-	pub fn realm(&self) -> &str {
-		self.realm.as_str()
-	}
+    /// Get the authorization realm.
+    pub fn realm(&self) -> &str {
+        self.realm.as_str()
+    }
 
-	/// Set the authorization realm.
-	pub fn set_realm(&mut self, realm: String) {
-		self.realm = realm;
-	}
+    /// Set the authorization realm.
+    pub fn set_realm(&mut self, realm: String) {
+        self.realm = realm;
+    }
 }
 
 impl Header for WwwAuthenticate {
-	fn header_name(&self) -> HeaderName {
-		WWW_AUTHENTICATE
-	}
+    fn header_name(&self) -> HeaderName {
+        WWW_AUTHENTICATE
+    }
 
-	fn header_value(&self) -> HeaderValue {
-		let output = format!(r#"{} realm="{}", charset="UTF-8""#, self.scheme, self.realm);
+    fn header_value(&self) -> HeaderValue {
+        let output = format!(r#"{} realm="{}", charset="UTF-8""#, self.scheme, self.realm);
 
-		// SAFETY: the internal string is validated to be ASCII.
-		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-	}
+        // SAFETY: the internal string is validated to be ASCII.
+        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+    }
 }
 
 #[cfg(test)]
 mod test {
-	use super::*;
-	use crate::headers::Headers;
+    use super::*;
+    use crate::headers::Headers;
 
-	#[test]
-	fn smoke() -> crate::Result<()> {
-		let scheme = AuthenticationScheme::Basic;
-		let realm = "Access to the staging site";
-		let authz = WwwAuthenticate::new(scheme, realm.into());
+    #[test]
+    fn smoke() -> crate::Result<()> {
+        let scheme = AuthenticationScheme::Basic;
+        let realm = "Access to the staging site";
+        let authz = WwwAuthenticate::new(scheme, realm.into());
 
-		let mut headers = Headers::new();
-		authz.apply_header(&mut headers);
+        let mut headers = Headers::new();
+        authz.apply_header(&mut headers);
 
-		assert_eq!(
-			headers["WWW-Authenticate"],
-			r#"Basic realm="Access to the staging site", charset="UTF-8""#
-		);
+        assert_eq!(
+            headers["WWW-Authenticate"],
+            r#"Basic realm="Access to the staging site", charset="UTF-8""#
+        );
 
-		let authz = WwwAuthenticate::from_headers(headers)?.unwrap();
+        let authz = WwwAuthenticate::from_headers(headers)?.unwrap();
 
-		assert_eq!(authz.scheme(), AuthenticationScheme::Basic);
-		assert_eq!(authz.realm(), realm);
-		Ok(())
-	}
+        assert_eq!(authz.scheme(), AuthenticationScheme::Basic);
+        assert_eq!(authz.realm(), realm);
+        Ok(())
+    }
 
-	#[test]
-	fn bad_request_on_parse_error() {
-		let mut headers = Headers::new();
-		headers.insert(WWW_AUTHENTICATE, "<nori ate the tag. yum.>").unwrap();
-		let err = WwwAuthenticate::from_headers(headers).unwrap_err();
-		assert_eq!(err.status(), 400);
-	}
+    #[test]
+    fn bad_request_on_parse_error() {
+        let mut headers = Headers::new();
+        headers.insert(WWW_AUTHENTICATE, "<nori ate the tag. yum.>").unwrap();
+        let err = WwwAuthenticate::from_headers(headers).unwrap_err();
+        assert_eq!(err.status(), 400);
+    }
 }

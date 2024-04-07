@@ -42,12 +42,12 @@ pub use timing_allow_origin::TimingAllowOrigin;
 // /// assert_eq!(headers["X-XSS-Protection"], "1; mode=block");
 // /// ```
 pub fn default(mut headers: impl AsMut<Headers>) {
-	dns_prefetch_control(&mut headers);
-	nosniff(&mut headers);
-	frameguard(&mut headers, None);
-	powered_by(&mut headers, None);
-	hsts(&mut headers);
-	xss_filter(&mut headers);
+    dns_prefetch_control(&mut headers);
+    nosniff(&mut headers);
+    frameguard(&mut headers, None);
+    powered_by(&mut headers, None);
+    hsts(&mut headers);
+    xss_filter(&mut headers);
 }
 
 /// Disable browsers’ DNS prefetching by setting the `X-DNS-Prefetch-Control` header.
@@ -64,17 +64,17 @@ pub fn default(mut headers: impl AsMut<Headers>) {
 // /// ```
 #[inline]
 pub fn dns_prefetch_control(mut headers: impl AsMut<Headers>) {
-	// This will never fail, could use an unsafe version of insert.
-	headers.as_mut().insert("X-DNS-Prefetch-Control", "on").unwrap();
+    // This will never fail, could use an unsafe version of insert.
+    headers.as_mut().insert("X-DNS-Prefetch-Control", "on").unwrap();
 }
 
 /// Set the frameguard level.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FrameOptions {
-	/// Set to `sameorigin`
-	SameOrigin,
-	/// Set to `deny`
-	Deny,
+    /// Set to `sameorigin`
+    SameOrigin,
+    /// Set to `deny`
+    Deny,
 }
 
 /// Mitigates clickjacking attacks by setting the `X-Frame-Options` header.
@@ -91,12 +91,12 @@ pub enum FrameOptions {
 // /// ```
 #[inline]
 pub fn frameguard(mut headers: impl AsMut<Headers>, guard: Option<FrameOptions>) {
-	let kind = match guard {
-		None | Some(FrameOptions::SameOrigin) => "sameorigin",
-		Some(FrameOptions::Deny) => "deny",
-	};
-	// This will never fail, could use an unsafe version of insert.
-	headers.as_mut().insert("X-Frame-Options", kind).unwrap();
+    let kind = match guard {
+        None | Some(FrameOptions::SameOrigin) => "sameorigin",
+        Some(FrameOptions::Deny) => "deny",
+    };
+    // This will never fail, could use an unsafe version of insert.
+    headers.as_mut().insert("X-Frame-Options", kind).unwrap();
 }
 
 /// Removes the `X-Powered-By` header to make it slightly harder for attackers to see what
@@ -115,16 +115,16 @@ pub fn frameguard(mut headers: impl AsMut<Headers>, guard: Option<FrameOptions>)
 // /// ```
 #[inline]
 pub fn powered_by(mut headers: impl AsMut<Headers>, value: Option<HeaderValue>) {
-	let name = HeaderName::from_lowercase_str("X-Powered-By");
-	match value {
-		Some(value) => {
-			// Can never fail as value is already a HeaderValue, could use unsafe version of insert
-			headers.as_mut().insert(name, value).unwrap();
-		}
-		None => {
-			headers.as_mut().remove(name);
-		}
-	};
+    let name = HeaderName::from_lowercase_str("X-Powered-By");
+    match value {
+        Some(value) => {
+            // Can never fail as value is already a HeaderValue, could use unsafe version of insert
+            headers.as_mut().insert(name, value).unwrap();
+        }
+        None => {
+            headers.as_mut().remove(name);
+        }
+    };
 }
 
 /// Sets the `Strict-Transport-Security` header to keep your users on `HTTPS`.
@@ -144,8 +144,8 @@ pub fn powered_by(mut headers: impl AsMut<Headers>, value: Option<HeaderValue>) 
 // /// ```
 #[inline]
 pub fn hsts(mut headers: impl AsMut<Headers>) {
-	// Never fails, could use unsafe version of insert
-	headers.as_mut().insert("Strict-Transport-Security", "max-age=5184000").unwrap();
+    // Never fails, could use unsafe version of insert
+    headers.as_mut().insert("Strict-Transport-Security", "max-age=5184000").unwrap();
 }
 
 /// Prevent browsers from trying to guess (“sniff”) the MIME type, which can have security
@@ -163,8 +163,8 @@ pub fn hsts(mut headers: impl AsMut<Headers>) {
 // /// ```
 #[inline]
 pub fn nosniff(mut headers: impl AsMut<Headers>) {
-	// Never fails, could use unsafe verison of insert.
-	headers.as_mut().insert("X-Content-Type-Options", "nosniff").unwrap();
+    // Never fails, could use unsafe verison of insert.
+    headers.as_mut().insert("X-Content-Type-Options", "nosniff").unwrap();
 }
 
 /// Sets the `X-XSS-Protection` header to prevent reflected XSS attacks.
@@ -181,29 +181,29 @@ pub fn nosniff(mut headers: impl AsMut<Headers>) {
 // /// ```
 #[inline]
 pub fn xss_filter(mut headers: impl AsMut<Headers>) {
-	// Never fails, could use unsafe version of insert.
-	headers.as_mut().insert("X-XSS-Protection", "1; mode=block").unwrap();
+    // Never fails, could use unsafe version of insert.
+    headers.as_mut().insert("X-XSS-Protection", "1; mode=block").unwrap();
 }
 
 /// Set the Referrer-Policy level
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ReferrerOptions {
-	/// Set to "no-referrer"
-	NoReferrer,
-	/// Set to "no-referrer-when-downgrade" the default
-	NoReferrerDowngrade,
-	/// Set to "same-origin"
-	SameOrigin,
-	/// Set to "origin"
-	Origin,
-	/// Set to "strict-origin"
-	StrictOrigin,
-	/// Set to "origin-when-cross-origin"
-	CrossOrigin,
-	/// Set to "strict-origin-when-cross-origin"
-	StrictCrossOrigin,
-	/// Set to "unsafe-url"
-	UnsafeUrl,
+    /// Set to "no-referrer"
+    NoReferrer,
+    /// Set to "no-referrer-when-downgrade" the default
+    NoReferrerDowngrade,
+    /// Set to "same-origin"
+    SameOrigin,
+    /// Set to "origin"
+    Origin,
+    /// Set to "strict-origin"
+    StrictOrigin,
+    /// Set to "origin-when-cross-origin"
+    CrossOrigin,
+    /// Set to "strict-origin-when-cross-origin"
+    StrictCrossOrigin,
+    /// Set to "unsafe-url"
+    UnsafeUrl,
 }
 
 /// Mitigates referrer leakage by controlling the referer\[sic\] header in links away from pages
@@ -225,19 +225,19 @@ pub enum ReferrerOptions {
 // /// ```
 #[inline]
 pub fn referrer_policy(mut headers: impl AsMut<Headers>, referrer: Option<ReferrerOptions>) {
-	let policy = match referrer {
-		None | Some(ReferrerOptions::NoReferrer) => "no-referrer",
-		Some(ReferrerOptions::NoReferrerDowngrade) => "no-referrer-when-downgrade",
-		Some(ReferrerOptions::SameOrigin) => "same-origin",
-		Some(ReferrerOptions::Origin) => "origin",
-		Some(ReferrerOptions::StrictOrigin) => "strict-origin",
-		Some(ReferrerOptions::CrossOrigin) => "origin-when-cross-origin",
-		Some(ReferrerOptions::StrictCrossOrigin) => "strict-origin-when-cross-origin",
-		Some(ReferrerOptions::UnsafeUrl) => "unsafe-url",
-	};
+    let policy = match referrer {
+        None | Some(ReferrerOptions::NoReferrer) => "no-referrer",
+        Some(ReferrerOptions::NoReferrerDowngrade) => "no-referrer-when-downgrade",
+        Some(ReferrerOptions::SameOrigin) => "same-origin",
+        Some(ReferrerOptions::Origin) => "origin",
+        Some(ReferrerOptions::StrictOrigin) => "strict-origin",
+        Some(ReferrerOptions::CrossOrigin) => "origin-when-cross-origin",
+        Some(ReferrerOptions::StrictCrossOrigin) => "strict-origin-when-cross-origin",
+        Some(ReferrerOptions::UnsafeUrl) => "unsafe-url",
+    };
 
-	// We MUST allow for multiple Referrer-Policy headers to be set.
-	// See: https://w3c.github.io/webappsec-referrer-policy/#unknown-policy-values example #13
-	// Never fails, could use unsafe version of append.
-	headers.as_mut().append("Referrer-Policy", policy).unwrap();
+    // We MUST allow for multiple Referrer-Policy headers to be set.
+    // See: https://w3c.github.io/webappsec-referrer-policy/#unknown-policy-values example #13
+    // Never fails, could use unsafe version of append.
+    headers.as_mut().append("Referrer-Policy", policy).unwrap();
 }

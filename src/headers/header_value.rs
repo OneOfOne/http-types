@@ -50,26 +50,20 @@ impl HeaderValue {
 
 impl From<Mime> for HeaderValue {
     fn from(mime: Mime) -> Self {
-        HeaderValue {
-            inner: format!("{}", mime),
-        }
+        HeaderValue { inner: format!("{}", mime) }
     }
 }
 
 #[cfg(feature = "cookies")]
 impl From<Cookie<'_>> for HeaderValue {
     fn from(cookie: Cookie<'_>) -> Self {
-        HeaderValue {
-            inner: cookie.to_string(),
-        }
+        HeaderValue { inner: cookie.to_string() }
     }
 }
 
 impl From<&Mime> for HeaderValue {
     fn from(mime: &Mime) -> Self {
-        HeaderValue {
-            inner: format!("{}", mime),
-        }
+        HeaderValue { inner: format!("{}", mime) }
     }
 }
 
@@ -81,9 +75,7 @@ impl FromStr for HeaderValue {
     /// This checks it's valid ASCII.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         crate::ensure!(s.is_ascii(), "String slice should be valid ASCII");
-        Ok(Self {
-            inner: String::from(s),
-        })
+        Ok(Self { inner: String::from(s) })
     }
 }
 
@@ -134,10 +126,7 @@ impl PartialEq<&String> for HeaderValue {
 impl From<HeaderValues> for HeaderValue {
     fn from(mut other: HeaderValues) -> Self {
         other.inner.reverse();
-        other
-            .inner
-            .pop()
-            .expect("HeaderValues should contain at least one value")
+        other.inner.pop().expect("HeaderValues should contain at least one value")
     }
 }
 

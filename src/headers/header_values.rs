@@ -37,9 +37,7 @@ impl HeaderValues {
 
     /// Returns the last `HeaderValue`.
     pub fn last(&self) -> &HeaderValue {
-        self.inner
-            .last()
-            .expect("HeaderValues must always contain at least one value")
+        self.inner.last().expect("HeaderValues must always contain at least one value")
     }
 
     /// An iterator visiting all header values in arbitrary order.

@@ -31,79 +31,79 @@ use std::time::Duration;
 /// ```
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Age {
-	dur: Duration,
+    dur: Duration,
 }
 
 impl Age {
-	/// Create a new instance of `Age`.
-	pub fn new(dur: Duration) -> Self {
-		Self { dur }
-	}
+    /// Create a new instance of `Age`.
+    pub fn new(dur: Duration) -> Self {
+        Self { dur }
+    }
 
-	/// Create a new instance of `Age` from secs.
-	pub fn from_secs(secs: u64) -> Self {
-		let dur = Duration::from_secs(secs);
-		Self { dur }
-	}
+    /// Create a new instance of `Age` from secs.
+    pub fn from_secs(secs: u64) -> Self {
+        let dur = Duration::from_secs(secs);
+        Self { dur }
+    }
 
-	/// Get the duration from the header.
-	pub fn duration(&self) -> Duration {
-		self.dur
-	}
+    /// Get the duration from the header.
+    pub fn duration(&self) -> Duration {
+        self.dur
+    }
 
-	/// Create an instance of `Age` from a `Headers` instance.
-	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-		let headers = match headers.as_ref().get(AGE) {
-			Some(headers) => headers,
-			None => return Ok(None),
-		};
+    /// Create an instance of `Age` from a `Headers` instance.
+    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+        let headers = match headers.as_ref().get(AGE) {
+            Some(headers) => headers,
+            None => return Ok(None),
+        };
 
-		// If we successfully parsed the header then there's always at least one
-		// entry. We want the last entry.
-		let header = headers.iter().last().unwrap();
+        // If we successfully parsed the header then there's always at least one
+        // entry. We want the last entry.
+        let header = headers.iter().last().unwrap();
 
-		let num: u64 = header.as_str().parse::<u64>().status(400)?;
-		let dur = Duration::from_secs_f64(num as f64);
+        let num: u64 = header.as_str().parse::<u64>().status(400)?;
+        let dur = Duration::from_secs_f64(num as f64);
 
-		Ok(Some(Self { dur }))
-	}
+        Ok(Some(Self { dur }))
+    }
 }
 
 impl Header for Age {
-	fn header_name(&self) -> HeaderName {
-		AGE
-	}
+    fn header_name(&self) -> HeaderName {
+        AGE
+    }
 
-	fn header_value(&self) -> HeaderValue {
-		let output = self.dur.as_secs().to_string();
+    fn header_value(&self) -> HeaderValue {
+        let output = self.dur.as_secs().to_string();
 
-		// SAFETY: the internal string is validated to be ASCII.
-		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-	}
+        // SAFETY: the internal string is validated to be ASCII.
+        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+    }
 }
 
 #[cfg(test)]
 mod test {
-	use super::*;
-	use crate::headers::Headers;
+    use super::*;
+    use crate::headers::Headers;
 
-	#[test]
-	fn smoke() -> crate::Result<()> {
-		let age = Age::new(Duration::from_secs(12));
+    #[test]
+    fn smoke() -> crate::Result<()> {
+        let age = Age::new(Duration::from_secs(12));
 
-		let mut headers = Headers::new();
-		age.apply_header(&mut headers);
+        let mut headers = Headers::new();
+        age.apply_header(&mut headers);
 
-		let age = Age::from_headers(headers)?.unwrap();
-		assert_eq!(age, Age::new(Duration::from_secs(12)));
-		Ok(())
-	}
+        let age = Age::from_headers(headers)?.unwrap();
+        assert_eq!(age, Age::new(Duration::from_secs(12)));
+        Ok(())
+    }
 
-	#[test]
-	fn bad_request_on_parse_error() {
-		let mut headers = Headers::new();
-		headers.insert(AGE, "<nori ate the tag. yum.>").unwrap();
-		let err = Age::from_headers(headers).unwrap_err();
-		assert_eq!(err.status(), 400);
-	}
+    #[test]
+    fn bad_request_on_parse_error() {
+        let mut headers = Headers::new();
+        headers.insert(AGE, "<nori ate the tag. yum.>").unwrap();
+        let err = Age::from_headers(headers).unwrap_err();
+        assert_eq!(err.status(), 400);
+    }
 }

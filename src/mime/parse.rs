@@ -54,8 +54,7 @@ pub(crate) fn parse(input: &str) -> crate::Result<Mime> {
         input = input.trim_start_matches(is_http_whitespace_char);
 
         // 3.
-        let (parameter_name, new_input) =
-            collect_code_point_sequence_slice(input, &[';', '='] as &[char]);
+        let (parameter_name, new_input) = collect_code_point_sequence_slice(input, &[';', '='] as &[char]);
         input = new_input;
 
         // 4.
@@ -97,9 +96,7 @@ pub(crate) fn parse(input: &str) -> crate::Result<Mime> {
             is_utf8 = true;
         } else if !parameter_name.is_empty()
             && parameter_name.chars().all(is_http_token_code_point)
-            && parameter_value
-                .chars()
-                .all(is_http_quoted_string_token_code_point)
+            && parameter_value.chars().all(is_http_quoted_string_token_code_point)
         {
             let name = ParamName(parameter_name.into());
             let value = ParamValue(parameter_value.into());
@@ -172,8 +169,7 @@ fn collect_http_quoted_string(mut input: &str) -> (String, &str) {
     // 5.
     loop {
         // 1.
-        let (add_value, new_input) =
-            collect_code_point_sequence_slice(input, &['"', '\\'] as &[char]);
+        let (add_value, new_input) = collect_code_point_sequence_slice(input, &['"', '\\'] as &[char]);
         value.push_str(add_value);
         let mut chars = new_input.chars();
         // 3.
@@ -319,11 +315,7 @@ fn whatwag_tests() {
         assert!(parse(input).is_err());
     }
 
-    fn assert_parse_and_encoding(
-        input: &str,
-        expected: &str,
-        _encoding: impl Into<Option<&'static str>>,
-    ) {
+    fn assert_parse_and_encoding(input: &str, expected: &str, _encoding: impl Into<Option<&'static str>>) {
         //TODO: check encoding
         assert_parse(input, expected);
     }
@@ -334,38 +326,18 @@ fn whatwag_tests() {
 
     //" Legacy comment syntax"
     assert_parse_and_encoding("text/html;charset=gbk(", "text/html;charset=\"gbk(\"", None);
-    assert_parse_and_encoding(
-        "text/html;x=(;charset=gbk",
-        "text/html;x=\"(\";charset=gbk",
-        "GBK",
-    );
+    assert_parse_and_encoding("text/html;x=(;charset=gbk", "text/html;x=\"(\";charset=gbk", "GBK");
 
     // Duplicate parameter
-    assert_parse_and_encoding(
-        "text/html;charset=gbk;charset=windows-1255",
-        "text/html;charset=gbk",
-        "GBK",
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=();charset=GBK",
-        "text/html;charset=\"()\"",
-        None,
-    );
+    assert_parse_and_encoding("text/html;charset=gbk;charset=windows-1255", "text/html;charset=gbk", "GBK");
+    assert_parse_and_encoding("text/html;charset=();charset=GBK", "text/html;charset=\"()\"", None);
 
     // Spaces
     assert_parse_and_encoding("text/html;charset =gbk", "text/html", None);
     assert_parse_and_encoding("text/html ;charset=gbk", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html; charset=gbk", "text/html;charset=gbk", "GBK");
-    assert_parse_and_encoding(
-        "text/html;charset= gbk",
-        "text/html;charset=\" gbk\"",
-        "GBK",
-    );
-    assert_parse_and_encoding(
-        "text/html;charset= \"gbk\"",
-        "text/html;charset=\" \\\"gbk\\\"\"",
-        None,
-    );
+    assert_parse_and_encoding("text/html;charset= gbk", "text/html;charset=\" gbk\"", "GBK");
+    assert_parse_and_encoding("text/html;charset= \"gbk\"", "text/html;charset=\" \\\"gbk\\\"\"", None);
 
     // 0x0B and 0x0C
     assert_parse_and_encoding("text/html;charset=\u{000B}gbk", "text/html", None);
@@ -377,80 +349,32 @@ fn whatwag_tests() {
     assert_parse_and_encoding("text/html;charset='gbk'", "text/html;charset='gbk'", None);
     assert_parse_and_encoding("text/html;charset='gbk", "text/html;charset='gbk", None);
     assert_parse_and_encoding("text/html;charset=gbk'", "text/html;charset=gbk'", None);
-    assert_parse_and_encoding(
-        "text/html;charset=';charset=GBK",
-        "text/html;charset='",
-        None,
-    );
+    assert_parse_and_encoding("text/html;charset=';charset=GBK", "text/html;charset='", None);
 
     // Invalid parameters
     assert_parse_and_encoding("text/html;test;charset=gbk", "text/html;charset=gbk", "GBK");
-    assert_parse_and_encoding(
-        "text/html;test=;charset=gbk",
-        "text/html;charset=gbk",
-        "GBK",
-    );
+    assert_parse_and_encoding("text/html;test=;charset=gbk", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html;';charset=gbk", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html;\";charset=gbk", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html ; ; charset=gbk", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html;;;;charset=gbk", "text/html;charset=gbk", "GBK");
-    assert_parse_and_encoding(
-        "text/html;charset= \"\u{007F};charset=GBK",
-        "text/html;charset=GBK",
-        "GBK",
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=\"\u{007F};charset=foo\";charset=GBK",
-        "text/html;charset=GBK",
-        "GBK",
-    );
+    assert_parse_and_encoding("text/html;charset= \"\u{007F};charset=GBK", "text/html;charset=GBK", "GBK");
+    assert_parse_and_encoding("text/html;charset=\"\u{007F};charset=foo\";charset=GBK", "text/html;charset=GBK", "GBK");
 
     // Double quotes"
     assert_parse_and_encoding("text/html;charset=\"gbk\"", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html;charset=\"gbk", "text/html;charset=gbk", "GBK");
-    assert_parse_and_encoding(
-        "text/html;charset=gbk\"",
-        "text/html;charset=\"gbk\\\"\"",
-        None,
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=\" gbk\"",
-        "text/html;charset=\" gbk\"",
-        "GBK",
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=\"gbk \"",
-        "text/html;charset=\"gbk \"",
-        "GBK",
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=\"\\ gbk\"",
-        "text/html;charset=\" gbk\"",
-        "GBK",
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=\"\\g\\b\\k\"",
-        "text/html;charset=gbk",
-        "GBK",
-    );
+    assert_parse_and_encoding("text/html;charset=gbk\"", "text/html;charset=\"gbk\\\"\"", None);
+    assert_parse_and_encoding("text/html;charset=\" gbk\"", "text/html;charset=\" gbk\"", "GBK");
+    assert_parse_and_encoding("text/html;charset=\"gbk \"", "text/html;charset=\"gbk \"", "GBK");
+    assert_parse_and_encoding("text/html;charset=\"\\ gbk\"", "text/html;charset=\" gbk\"", "GBK");
+    assert_parse_and_encoding("text/html;charset=\"\\g\\b\\k\"", "text/html;charset=gbk", "GBK");
     assert_parse_and_encoding("text/html;charset=\"gbk\"x", "text/html;charset=gbk", "GBK");
-    assert_parse_and_encoding(
-        "text/html;charset=\"\";charset=GBK",
-        "text/html;charset=\"\"",
-        None,
-    );
-    assert_parse_and_encoding(
-        "text/html;charset=\";charset=GBK",
-        "text/html;charset=\";charset=GBK\"",
-        None,
-    );
+    assert_parse_and_encoding("text/html;charset=\"\";charset=GBK", "text/html;charset=\"\"", None);
+    assert_parse_and_encoding("text/html;charset=\";charset=GBK", "text/html;charset=\";charset=GBK\"", None);
 
     // Unexpected code points
-    assert_parse_and_encoding(
-        "text/html;charset={gbk}",
-        "text/html;charset=\"{gbk}\"",
-        None,
-    );
+    assert_parse_and_encoding("text/html;charset={gbk}", "text/html;charset=\"{gbk}\"", None);
 
     // Parameter name longer than 127
     assert_parse_and_encoding("text/html;0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=x;charset=gbk", "text/html;0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=x;charset=gbk", "GBK");
@@ -474,11 +398,7 @@ fn whatwag_tests() {
     assert_parse("x/x;\n\r\t x=x\n\r\t ;x=y", "x/x;x=x");
 
     // Latin1
-    assert_parse_and_encoding(
-        "text/html;test=\u{00FF};charset=gbk",
-        "text/html;test=\"\u{00FF}\";charset=gbk",
-        "GBK",
-    );
+    assert_parse_and_encoding("text/html;test=\u{00FF};charset=gbk", "text/html;test=\"\u{00FF}\";charset=gbk", "GBK");
 
     // >Latin1
     assert_parse("x/x;test=\u{FFFD};x=x", "x/x;x=x");

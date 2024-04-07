@@ -3,15 +3,7 @@ use std::borrow::Cow;
 
 macro_rules! utf8_mime_const {
     ($name:ident, $desc:expr, $base:expr, $sub:expr) => {
-        mime_const!(
-            with_params,
-            $name,
-            $desc,
-            $base,
-            $sub,
-            true,
-            ";charset=utf-8"
-        );
+        mime_const!(with_params, $name, $desc, $base, $sub, true, ";charset=utf-8");
     };
 }
 macro_rules! mime_const {

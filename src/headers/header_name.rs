@@ -172,8 +172,7 @@ mod tests {
     #[test]
     fn pass_name_by_ref() {
         let mut res = crate::Response::new(200);
-        res.insert_header(&crate::headers::HOST, "127.0.0.1")
-            .unwrap();
+        res.insert_header(&crate::headers::HOST, "127.0.0.1").unwrap();
     }
 
     #[test]

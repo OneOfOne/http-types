@@ -36,75 +36,75 @@ use std::time::SystemTime;
 /// ```
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct LastModified {
-	instant: SystemTime,
+    instant: SystemTime,
 }
 
 impl LastModified {
-	/// Create a new instance of `LastModified`.
-	pub fn new(instant: SystemTime) -> Self {
-		Self { instant }
-	}
+    /// Create a new instance of `LastModified`.
+    pub fn new(instant: SystemTime) -> Self {
+        Self { instant }
+    }
 
-	/// Returns the last modification time listed.
-	pub fn modified(&self) -> SystemTime {
-		self.instant
-	}
+    /// Returns the last modification time listed.
+    pub fn modified(&self) -> SystemTime {
+        self.instant
+    }
 
-	/// Create an instance of `LastModified` from a `Headers` instance.
-	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-		let headers = match headers.as_ref().get(LAST_MODIFIED) {
-			Some(headers) => headers,
-			None => return Ok(None),
-		};
+    /// Create an instance of `LastModified` from a `Headers` instance.
+    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+        let headers = match headers.as_ref().get(LAST_MODIFIED) {
+            Some(headers) => headers,
+            None => return Ok(None),
+        };
 
-		// If we successfully parsed the header then there's always at least one
-		// entry. We want the last entry.
-		let header = headers.iter().last().unwrap();
+        // If we successfully parsed the header then there's always at least one
+        // entry. We want the last entry.
+        let header = headers.iter().last().unwrap();
 
-		let instant = parse_http_date(header.as_str())?;
-		Ok(Some(Self { instant }))
-	}
+        let instant = parse_http_date(header.as_str())?;
+        Ok(Some(Self { instant }))
+    }
 }
 
 impl Header for LastModified {
-	fn header_name(&self) -> HeaderName {
-		LAST_MODIFIED
-	}
-	fn header_value(&self) -> HeaderValue {
-		let output = fmt_http_date(self.instant);
+    fn header_name(&self) -> HeaderName {
+        LAST_MODIFIED
+    }
+    fn header_value(&self) -> HeaderValue {
+        let output = fmt_http_date(self.instant);
 
-		// SAFETY: the internal string is validated to be ASCII.
-		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-	}
+        // SAFETY: the internal string is validated to be ASCII.
+        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+    }
 }
 
 #[cfg(test)]
 mod test {
-	use super::*;
-	use crate::headers::Headers;
-	use std::time::Duration;
+    use super::*;
+    use crate::headers::Headers;
+    use std::time::Duration;
 
-	#[test]
-	fn smoke() -> crate::Result<()> {
-		let time = SystemTime::now() + Duration::from_secs(5 * 60);
-		let last_modified = LastModified::new(time);
+    #[test]
+    fn smoke() -> crate::Result<()> {
+        let time = SystemTime::now() + Duration::from_secs(5 * 60);
+        let last_modified = LastModified::new(time);
 
-		let mut headers = Headers::new();
-		last_modified.apply_header(&mut headers);
+        let mut headers = Headers::new();
+        last_modified.apply_header(&mut headers);
 
-		let last_modified = LastModified::from_headers(headers)?.unwrap();
+        let last_modified = LastModified::from_headers(headers)?.unwrap();
 
-		// HTTP dates only have second-precision
-		let elapsed = time.duration_since(last_modified.modified())?;
-		assert_eq!(elapsed.as_secs(), 0);
-		Ok(())
-	}
+        // HTTP dates only have second-precision
+        let elapsed = time.duration_since(last_modified.modified())?;
+        assert_eq!(elapsed.as_secs(), 0);
+        Ok(())
+    }
 
-	#[test]
-	fn bad_request_on_parse_error() {
-		let mut headers = Headers::new();
-		headers.insert(LAST_MODIFIED, "<nori ate the tag. yum.>").unwrap();
-		let err = LastModified::from_headers(headers).unwrap_err();
-		assert_eq!(err.status(), 400);
-	}
+    #[test]
+    fn bad_request_on_parse_error() {
+        let mut headers = Headers::new();
+        headers.insert(LAST_MODIFIED, "<nori ate the tag. yum.>").unwrap();
+        let err = LastModified::from_headers(headers).unwrap_err();
+        assert_eq!(err.status(), 400);
+    }
 }

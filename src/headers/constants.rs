@@ -34,29 +34,21 @@ pub const HOST: HeaderName = HeaderName::from_lowercase_str("host");
 pub const ORIGIN: HeaderName = HeaderName::from_lowercase_str("origin");
 
 /// The `access-control-max-age` Header
-pub const ACCESS_CONTROL_MAX_AGE: HeaderName =
-    HeaderName::from_lowercase_str("access-control-max-age");
+pub const ACCESS_CONTROL_MAX_AGE: HeaderName = HeaderName::from_lowercase_str("access-control-max-age");
 /// The `access-control-allow-origin` Header
-pub const ACCESS_CONTROL_ALLOW_ORIGIN: HeaderName =
-    HeaderName::from_lowercase_str("access-control-allow-origin");
+pub const ACCESS_CONTROL_ALLOW_ORIGIN: HeaderName = HeaderName::from_lowercase_str("access-control-allow-origin");
 /// The `access-control-allow-headers` Header
-pub const ACCESS_CONTROL_ALLOW_HEADERS: HeaderName =
-    HeaderName::from_lowercase_str("access-control-allow-headers");
+pub const ACCESS_CONTROL_ALLOW_HEADERS: HeaderName = HeaderName::from_lowercase_str("access-control-allow-headers");
 /// The `access-control-allow-methods` Header
-pub const ACCESS_CONTROL_ALLOW_METHODS: HeaderName =
-    HeaderName::from_lowercase_str("access-control-allow-methods");
+pub const ACCESS_CONTROL_ALLOW_METHODS: HeaderName = HeaderName::from_lowercase_str("access-control-allow-methods");
 /// The `access-control-expose-headers` Header
-pub const ACCESS_CONTROL_EXPOSE_HEADERS: HeaderName =
-    HeaderName::from_lowercase_str("access-control-expose-headers");
+pub const ACCESS_CONTROL_EXPOSE_HEADERS: HeaderName = HeaderName::from_lowercase_str("access-control-expose-headers");
 /// The `access-control-request-method` Header
-pub const ACCESS_CONTROL_REQUEST_METHOD: HeaderName =
-    HeaderName::from_lowercase_str("access-control-request-method");
+pub const ACCESS_CONTROL_REQUEST_METHOD: HeaderName = HeaderName::from_lowercase_str("access-control-request-method");
 /// The `access-control-request-headers` Header
-pub const ACCESS_CONTROL_REQUEST_HEADERS: HeaderName =
-    HeaderName::from_lowercase_str("access-control-request-headers");
+pub const ACCESS_CONTROL_REQUEST_HEADERS: HeaderName = HeaderName::from_lowercase_str("access-control-request-headers");
 /// The `access-control-allow-credentials` Header
-pub const ACCESS_CONTROL_ALLOW_CREDENTIALS: HeaderName =
-    HeaderName::from_lowercase_str("access-control-allow-credentials");
+pub const ACCESS_CONTROL_ALLOW_CREDENTIALS: HeaderName = HeaderName::from_lowercase_str("access-control-allow-credentials");
 
 ///  The `Accept` Header
 pub const ACCEPT: HeaderName = HeaderName::from_lowercase_str("accept");
@@ -154,8 +146,7 @@ pub const SERVER_TIMING: HeaderName = HeaderName::from_lowercase_str("server-tim
 pub const SOURCE_MAP: HeaderName = HeaderName::from_lowercase_str("sourcemap");
 
 ///  The `Strict-Transport-Security` Header
-pub const STRICT_TRANSPORT_SECURITY: HeaderName =
-    HeaderName::from_lowercase_str("strict-transport-security");
+pub const STRICT_TRANSPORT_SECURITY: HeaderName = HeaderName::from_lowercase_str("strict-transport-security");
 
 ///  The `Te` Header
 pub const TE: HeaderName = HeaderName::from_lowercase_str("te");

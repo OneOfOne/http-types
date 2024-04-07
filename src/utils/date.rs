@@ -71,12 +71,7 @@ impl HttpDate {
 
 fn parse_imf_fixdate(s: &[u8]) -> crate::Result<HttpDate> {
     // Example: `Sun, 06 Nov 1994 08:49:37 GMT`
-    if s.len() != IMF_FIXDATE_LENGTH
-        || &s[25..] != b" GMT"
-        || s[16] != b' '
-        || s[19] != b':'
-        || s[22] != b':'
-    {
+    if s.len() != IMF_FIXDATE_LENGTH || &s[25..] != b" GMT" || s[16] != b' ' || s[19] != b':' || s[22] != b':' {
         bail!("Date time not in imf fixdate format");
     }
     Ok(HttpDate {
@@ -115,10 +110,7 @@ fn parse_imf_fixdate(s: &[u8]) -> crate::Result<HttpDate> {
 
 fn parse_rfc850_date(s: &[u8]) -> crate::Result<HttpDate> {
     // Example: `Sunday, 06-Nov-94 08:49:37 GMT`
-    ensure!(
-        s.len() >= RFC850_MAX_LENGTH,
-        "Date time not in rfc850 format"
-    );
+    ensure!(s.len() >= RFC850_MAX_LENGTH, "Date time not in rfc850 format");
 
     fn week_day<'a>(s: &'a [u8], week_day: u8, name: &'static [u8]) -> Option<(u8, &'a [u8])> {
         if &s[0..name.len()] == name {
@@ -170,8 +162,7 @@ fn parse_rfc850_date(s: &[u8]) -> crate::Result<HttpDate> {
 
 fn parse_asctime(s: &[u8]) -> crate::Result<HttpDate> {
     // Example: `Sun Nov  6 08:49:37 1994`
-    if s.len() != ASCTIME_LENGTH || s[10] != b' ' || s[13] != b':' || s[16] != b':' || s[19] != b' '
-    {
+    if s.len() != ASCTIME_LENGTH || s[10] != b' ' || s[13] != b':' || s[16] != b':' || s[19] != b' ' {
         bail!("Date time not in asctime format");
     }
     Ok(HttpDate {
@@ -213,15 +204,10 @@ fn parse_asctime(s: &[u8]) -> crate::Result<HttpDate> {
 
 impl From<SystemTime> for HttpDate {
     fn from(system_time: SystemTime) -> Self {
-        let dur = system_time
-            .duration_since(UNIX_EPOCH)
-            .expect("all times should be after the epoch");
+        let dur = system_time.duration_since(UNIX_EPOCH).expect("all times should be after the epoch");
         let secs_since_epoch = dur.as_secs();
 
-        assert!(
-            secs_since_epoch < YEAR_9999_SECONDS,
-            "date must be before year 9999"
-        );
+        assert!(secs_since_epoch < YEAR_9999_SECONDS, "date must be before year 9999");
 
         /* 2000-03-01 (mod 400 year, immediately after feb29 */
         const LEAPOCH: i64 = 11017;
@@ -296,8 +282,7 @@ impl From<SystemTime> for HttpDate {
 
 impl From<HttpDate> for SystemTime {
     fn from(http_date: HttpDate) -> Self {
-        let leap_years = ((http_date.year - 1) - 1968) / 4 - ((http_date.year - 1) - 1900) / 100
-            + ((http_date.year - 1) - 1600) / 400;
+        let leap_years = ((http_date.year - 1) - 1968) / 4 - ((http_date.year - 1) - 1900) / 100 + ((http_date.year - 1) - 1600) / 400;
         let mut ydays = match http_date.month {
             1 => 0,
             2 => 31,
@@ -320,10 +305,7 @@ impl From<HttpDate> for SystemTime {
         let days = (http_date.year as u64 - 1970) * 365 + leap_years as u64 + ydays;
         UNIX_EPOCH
             + Duration::from_secs(
-                http_date.second as u64
-                    + http_date.minute as u64 * 60
-                    + http_date.hour as u64 * SECONDS_IN_HOUR
-                    + days * SECONDS_IN_DAY,
+                http_date.second as u64 + http_date.minute as u64 * 60 + http_date.hour as u64 * SECONDS_IN_HOUR + days * SECONDS_IN_DAY,
             )
     }
 }
@@ -334,9 +316,7 @@ impl FromStr for HttpDate {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         ensure!(s.is_ascii(), "String slice is not valid ASCII");
         let x = s.trim().as_bytes();
-        let date = parse_imf_fixdate(x)
-            .or_else(|_| parse_rfc850_date(x))
-            .or_else(|_| parse_asctime(x))?;
+        let date = parse_imf_fixdate(x).or_else(|_| parse_rfc850_date(x)).or_else(|_| parse_asctime(x))?;
         ensure!(date.is_valid(), "Invalid date time");
         Ok(date)
     }
@@ -371,9 +351,8 @@ impl Display for HttpDate {
         };
         let mut buf: [u8; 29] = [
             // Too long to write as: b"Thu, 01 Jan 1970 00:00:00 GMT"
-            b' ', b' ', b' ', b',', b' ', b'0', b'0', b' ', b' ', b' ', b' ', b' ', b'0', b'0',
-            b'0', b'0', b' ', b'0', b'0', b':', b'0', b'0', b':', b'0', b'0', b' ', b'G', b'M',
-            b'T',
+            b' ', b' ', b' ', b',', b' ', b'0', b'0', b' ', b' ', b' ', b' ', b' ', b'0', b'0', b'0', b'0', b' ', b'0', b'0', b':', b'0', b'0', b':',
+            b'0', b'0', b' ', b'G', b'M', b'T',
         ];
         buf[0] = week_day[0];
         buf[1] = week_day[1];
@@ -422,24 +401,15 @@ mod tests {
     #[test]
     fn test_rfc_example() {
         let d = UNIX_EPOCH + Duration::from_secs(784111777);
-        assert_eq!(
-            d,
-            parse_http_date("Sun, 06 Nov 1994 08:49:37 GMT").expect("#1")
-        );
-        assert_eq!(
-            d,
-            parse_http_date("Sunday, 06-Nov-94 08:49:37 GMT").expect("#2")
-        );
+        assert_eq!(d, parse_http_date("Sun, 06 Nov 1994 08:49:37 GMT").expect("#1"));
+        assert_eq!(d, parse_http_date("Sunday, 06-Nov-94 08:49:37 GMT").expect("#2"));
         assert_eq!(d, parse_http_date("Sun Nov  6 08:49:37 1994").expect("#3"));
     }
 
     #[test]
     fn test2() {
         let d = UNIX_EPOCH + Duration::from_secs(1475419451);
-        assert_eq!(
-            d,
-            parse_http_date("Sun, 02 Oct 2016 14:44:11 GMT").expect("#1")
-        );
+        assert_eq!(d, parse_http_date("Sun, 02 Oct 2016 14:44:11 GMT").expect("#1"));
         assert!(parse_http_date("Sun Nov 10 08:00:00 1000").is_err());
         assert!(parse_http_date("Sun Nov 10 08*00:00 2000").is_err());
         assert!(parse_http_date("Sunday, 06-Nov-94 08+49:37 GMT").is_err());

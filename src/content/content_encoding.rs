@@ -2,8 +2,8 @@
 
 use crate::headers::{HeaderName, HeaderValue, Headers, CONTENT_ENCODING};
 use crate::{
-	content::{Encoding, EncodingProposal},
-	headers::Header,
+    content::{Encoding, EncodingProposal},
+    headers::Header,
 };
 
 use std::fmt::{self, Debug};
@@ -33,100 +33,100 @@ use std::ops::{Deref, DerefMut};
 /// # Ok(()) }
 /// ```
 pub struct ContentEncoding {
-	inner: Encoding,
+    inner: Encoding,
 }
 
 impl ContentEncoding {
-	/// Create a new instance of `CacheControl`.
-	pub fn new(encoding: Encoding) -> Self {
-		Self { inner: encoding }
-	}
+    /// Create a new instance of `CacheControl`.
+    pub fn new(encoding: Encoding) -> Self {
+        Self { inner: encoding }
+    }
 
-	/// Create a new instance from headers.
-	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-		let headers = match headers.as_ref().get(CONTENT_ENCODING) {
-			Some(headers) => headers,
-			None => return Ok(None),
-		};
+    /// Create a new instance from headers.
+    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+        let headers = match headers.as_ref().get(CONTENT_ENCODING) {
+            Some(headers) => headers,
+            None => return Ok(None),
+        };
 
-		let mut inner = None;
+        let mut inner = None;
 
-		for value in headers {
-			if let Some(entry) = Encoding::from_str(value.as_str()) {
-				inner = Some(entry);
-			}
-		}
+        for value in headers {
+            if let Some(entry) = Encoding::from_str(value.as_str()) {
+                inner = Some(entry);
+            }
+        }
 
-		let inner = inner.expect("Headers instance with no entries found");
-		Ok(Some(Self { inner }))
-	}
+        let inner = inner.expect("Headers instance with no entries found");
+        Ok(Some(Self { inner }))
+    }
 
-	/// Access the encoding kind.
-	pub fn encoding(&self) -> Encoding {
-		self.inner
-	}
+    /// Access the encoding kind.
+    pub fn encoding(&self) -> Encoding {
+        self.inner
+    }
 }
 
 impl Header for ContentEncoding {
-	fn header_name(&self) -> HeaderName {
-		CONTENT_ENCODING
-	}
-	fn header_value(&self) -> HeaderValue {
-		self.inner.into()
-	}
+    fn header_name(&self) -> HeaderName {
+        CONTENT_ENCODING
+    }
+    fn header_value(&self) -> HeaderValue {
+        self.inner.into()
+    }
 }
 
 impl Deref for ContentEncoding {
-	type Target = Encoding;
-	fn deref(&self) -> &Self::Target {
-		&self.inner
-	}
+    type Target = Encoding;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
 }
 
 impl DerefMut for ContentEncoding {
-	fn deref_mut(&mut self) -> &mut Self::Target {
-		&mut self.inner
-	}
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
 }
 
 impl PartialEq<Encoding> for ContentEncoding {
-	fn eq(&self, other: &Encoding) -> bool {
-		&self.inner == other
-	}
+    fn eq(&self, other: &Encoding) -> bool {
+        &self.inner == other
+    }
 }
 
 impl PartialEq<&Encoding> for ContentEncoding {
-	fn eq(&self, other: &&Encoding) -> bool {
-		&&self.inner == other
-	}
+    fn eq(&self, other: &&Encoding) -> bool {
+        &&self.inner == other
+    }
 }
 
 impl From<Encoding> for ContentEncoding {
-	fn from(encoding: Encoding) -> Self {
-		Self { inner: encoding }
-	}
+    fn from(encoding: Encoding) -> Self {
+        Self { inner: encoding }
+    }
 }
 
 impl From<&Encoding> for ContentEncoding {
-	fn from(encoding: &Encoding) -> Self {
-		Self { inner: *encoding }
-	}
+    fn from(encoding: &Encoding) -> Self {
+        Self { inner: *encoding }
+    }
 }
 
 impl From<EncodingProposal> for ContentEncoding {
-	fn from(encoding: EncodingProposal) -> Self {
-		Self { inner: encoding.encoding }
-	}
+    fn from(encoding: EncodingProposal) -> Self {
+        Self { inner: encoding.encoding }
+    }
 }
 
 impl From<&EncodingProposal> for ContentEncoding {
-	fn from(encoding: &EncodingProposal) -> Self {
-		Self { inner: encoding.encoding }
-	}
+    fn from(encoding: &EncodingProposal) -> Self {
+        Self { inner: encoding.encoding }
+    }
 }
 
 impl Debug for ContentEncoding {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		self.inner.fmt(f)
-	}
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.inner.fmt(f)
+    }
 }

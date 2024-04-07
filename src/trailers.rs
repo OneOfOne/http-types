@@ -50,7 +50,6 @@
 
 use crate::headers::{HeaderName, HeaderValues, Headers, Iter, IterMut, Names, ToHeaderValues, Values};
 use async_channel::TryRecvError;
-use futures::Stream;
 
 use std::convert::Into;
 use std::future::Future;
@@ -61,141 +60,141 @@ use std::task::{Context, Poll};
 /// A collection of trailing HTTP headers.
 #[derive(Debug)]
 pub struct Trailers {
-	headers: Headers,
+    headers: Headers,
 }
 
 impl Trailers {
-	/// Create a new instance of `Trailers`.
-	pub fn new() -> Self {
-		Self { headers: Headers::new() }
-	}
+    /// Create a new instance of `Trailers`.
+    pub fn new() -> Self {
+        Self { headers: Headers::new() }
+    }
 
-	/// Insert a header into the headers.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-	/// #
-	/// use http_types_rs::trailers::Trailers;
-	///
-	/// let mut trailers = Trailers::new();
-	/// trailers.insert("Content-Type", "text/plain");
-	/// #
-	/// # Ok(()) }
-	/// ```
-	pub fn insert(&mut self, name: impl Into<HeaderName>, values: impl ToHeaderValues) -> crate::Result<Option<HeaderValues>> {
-		self.headers.insert(name, values)
-	}
+    /// Insert a header into the headers.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    /// #
+    /// use http_types_rs::trailers::Trailers;
+    ///
+    /// let mut trailers = Trailers::new();
+    /// trailers.insert("Content-Type", "text/plain");
+    /// #
+    /// # Ok(()) }
+    /// ```
+    pub fn insert(&mut self, name: impl Into<HeaderName>, values: impl ToHeaderValues) -> crate::Result<Option<HeaderValues>> {
+        self.headers.insert(name, values)
+    }
 
-	/// Append a header to the headers.
-	///
-	/// Unlike `insert` this function will not override the contents of a header, but insert a
-	/// header if there aren't any. Or else append to the existing list of headers.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-	/// #
-	/// use http_types_rs::trailers::Trailers;
-	///
-	/// let mut trailers = Trailers::new();
-	/// trailers.append("Content-Type", "text/plain");
-	/// #
-	/// # Ok(()) }
-	/// ```
-	pub fn append(&mut self, name: impl Into<HeaderName>, values: impl ToHeaderValues) -> crate::Result<()> {
-		self.headers.append(name, values)
-	}
+    /// Append a header to the headers.
+    ///
+    /// Unlike `insert` this function will not override the contents of a header, but insert a
+    /// header if there aren't any. Or else append to the existing list of headers.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    /// #
+    /// use http_types_rs::trailers::Trailers;
+    ///
+    /// let mut trailers = Trailers::new();
+    /// trailers.append("Content-Type", "text/plain");
+    /// #
+    /// # Ok(()) }
+    /// ```
+    pub fn append(&mut self, name: impl Into<HeaderName>, values: impl ToHeaderValues) -> crate::Result<()> {
+        self.headers.append(name, values)
+    }
 
-	/// Get a reference to a header.
-	pub fn get(&self, name: impl Into<HeaderName>) -> Option<&HeaderValues> {
-		self.headers.get(name)
-	}
+    /// Get a reference to a header.
+    pub fn get(&self, name: impl Into<HeaderName>) -> Option<&HeaderValues> {
+        self.headers.get(name)
+    }
 
-	/// Get a mutable reference to a header.
-	pub fn get_mut(&mut self, name: impl Into<HeaderName>) -> Option<&mut HeaderValues> {
-		self.headers.get_mut(name)
-	}
+    /// Get a mutable reference to a header.
+    pub fn get_mut(&mut self, name: impl Into<HeaderName>) -> Option<&mut HeaderValues> {
+        self.headers.get_mut(name)
+    }
 
-	/// Remove a header.
-	pub fn remove(&mut self, name: impl Into<HeaderName>) -> Option<HeaderValues> {
-		self.headers.remove(name)
-	}
+    /// Remove a header.
+    pub fn remove(&mut self, name: impl Into<HeaderName>) -> Option<HeaderValues> {
+        self.headers.remove(name)
+    }
 
-	/// An iterator visiting all header pairs in arbitrary order.
-	pub fn iter(&self) -> Iter<'_> {
-		self.headers.iter()
-	}
+    /// An iterator visiting all header pairs in arbitrary order.
+    pub fn iter(&self) -> Iter<'_> {
+        self.headers.iter()
+    }
 
-	/// An iterator visiting all header pairs in arbitrary order, with mutable references to the
-	/// values.
-	pub fn iter_mut(&mut self) -> IterMut<'_> {
-		self.headers.iter_mut()
-	}
+    /// An iterator visiting all header pairs in arbitrary order, with mutable references to the
+    /// values.
+    pub fn iter_mut(&mut self) -> IterMut<'_> {
+        self.headers.iter_mut()
+    }
 
-	/// An iterator visiting all header names in arbitrary order.
-	pub fn names(&self) -> Names<'_> {
-		self.headers.names()
-	}
+    /// An iterator visiting all header names in arbitrary order.
+    pub fn names(&self) -> Names<'_> {
+        self.headers.names()
+    }
 
-	/// An iterator visiting all header values in arbitrary order.
-	pub fn values(&self) -> Values<'_> {
-		self.headers.values()
-	}
+    /// An iterator visiting all header values in arbitrary order.
+    pub fn values(&self) -> Values<'_> {
+        self.headers.values()
+    }
 }
 
 impl Clone for Trailers {
-	fn clone(&self) -> Self {
-		Self {
-			headers: Headers {
-				headers: self.headers.headers.clone(),
-			},
-		}
-	}
+    fn clone(&self) -> Self {
+        Self {
+            headers: Headers {
+                headers: self.headers.headers.clone(),
+            },
+        }
+    }
 }
 
 impl Deref for Trailers {
-	type Target = Headers;
+    type Target = Headers;
 
-	fn deref(&self) -> &Self::Target {
-		&self.headers
-	}
+    fn deref(&self) -> &Self::Target {
+        &self.headers
+    }
 }
 
 impl DerefMut for Trailers {
-	fn deref_mut(&mut self) -> &mut Self::Target {
-		&mut self.headers
-	}
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.headers
+    }
 }
 
 impl Index<HeaderName> for Trailers {
-	type Output = HeaderValues;
+    type Output = HeaderValues;
 
-	/// Returns a reference to the value corresponding to the supplied name.
-	///
-	/// # Panics
-	///
-	/// Panics if the name is not present in `Trailers`.
-	#[inline]
-	fn index(&self, name: HeaderName) -> &HeaderValues {
-		self.headers.index(name)
-	}
+    /// Returns a reference to the value corresponding to the supplied name.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the name is not present in `Trailers`.
+    #[inline]
+    fn index(&self, name: HeaderName) -> &HeaderValues {
+        self.headers.index(name)
+    }
 }
 
 impl Index<&str> for Trailers {
-	type Output = HeaderValues;
+    type Output = HeaderValues;
 
-	/// Returns a reference to the value corresponding to the supplied name.
-	///
-	/// # Panics
-	///
-	/// Panics if the name is not present in `Trailers`.
-	#[inline]
-	fn index(&self, name: &str) -> &HeaderValues {
-		self.headers.index(name)
-	}
+    /// Returns a reference to the value corresponding to the supplied name.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the name is not present in `Trailers`.
+    #[inline]
+    fn index(&self, name: &str) -> &HeaderValues {
+        self.headers.index(name)
+    }
 }
 
 /// The sending half of a channel to send trailers.
@@ -205,22 +204,22 @@ impl Index<&str> for Trailers {
 /// `Trailers` should be created.
 #[derive(Debug)]
 pub struct Sender {
-	sender: async_channel::Sender<Trailers>,
+    sender: async_channel::Sender<Trailers>,
 }
 
 impl Sender {
-	/// Create a new instance of `Sender`.
-	#[doc(hidden)]
-	pub fn new(sender: async_channel::Sender<Trailers>) -> Self {
-		Self { sender }
-	}
+    /// Create a new instance of `Sender`.
+    #[doc(hidden)]
+    pub fn new(sender: async_channel::Sender<Trailers>) -> Self {
+        Self { sender }
+    }
 
-	/// Send a `Trailer`.
-	///
-	/// The channel will be consumed after having sent trailers.
-	pub async fn send(self, trailers: Trailers) {
-		let _ = self.sender.send(trailers).await;
-	}
+    /// Send a `Trailer`.
+    ///
+    /// The channel will be consumed after having sent trailers.
+    pub async fn send(self, trailers: Trailers) {
+        let _ = self.sender.send(trailers).await;
+    }
 }
 
 /// The receiving half of a channel to send trailers.
@@ -231,24 +230,24 @@ impl Sender {
 #[must_use = "Futures do nothing unless polled or .awaited"]
 #[derive(Debug)]
 pub struct Receiver {
-	receiver: async_channel::Receiver<Trailers>,
+    receiver: async_channel::Receiver<Trailers>,
 }
 
 impl Receiver {
-	/// Create a new instance of `Receiver`.
-	pub(crate) fn new(receiver: async_channel::Receiver<Trailers>) -> Self {
-		Self { receiver }
-	}
+    /// Create a new instance of `Receiver`.
+    pub(crate) fn new(receiver: async_channel::Receiver<Trailers>) -> Self {
+        Self { receiver }
+    }
 }
 
 impl Future for Receiver {
-	type Output = Option<Trailers>;
+    type Output = Option<Trailers>;
 
-	fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
-		match self.receiver.try_recv() {
-			Ok(conn) => Poll::Ready(Some(conn)),
-			Err(TryRecvError::Closed) => Poll::Ready(None),
-			Err(TryRecvError::Empty) => Poll::Pending,
-		}
-	}
+    fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
+        match self.receiver.try_recv() {
+            Ok(conn) => Poll::Ready(Some(conn)),
+            Err(TryRecvError::Closed) => Poll::Ready(None),
+            Err(TryRecvError::Empty) => Poll::Pending,
+        }
+    }
 }

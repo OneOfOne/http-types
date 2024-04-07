@@ -1,4 +1,4 @@
-<h1 align="center">http-types</h1>
+<h1 align="center">http-types-rs</h1>
 <div align="center">
   <strong>
     Common types for HTTP operations.
@@ -9,13 +9,13 @@
 
 <div align="center">
   <!-- Crates version -->
-  <a href="https://crates.io/crates/http-types">
-    <img src="https://img.shields.io/crates/v/http-types.svg?style=flat-square"
+  <a href="https://crates.io/crates/http-types-rs">
+    <img src="https://img.shields.io/crates/v/http-types-rs.svg?style=flat-square"
     alt="Crates.io version" />
   </a>
   <!-- Downloads -->
-  <a href="https://crates.io/crates/http-types">
-    <img src="https://img.shields.io/crates/d/http-types.svg?style=flat-square"
+  <a href="https://crates.io/crates/http-types-rs">
+    <img src="https://img.shields.io/crates/d/http-types-rs.svg?style=flat-square"
       alt="Download" />
   </a>
   <!-- docs.rs docs -->
@@ -27,15 +27,15 @@
 
 <div align="center">
   <h3>
-    <a href="https://docs.rs/http-types">
+    <a href="https://docs.rs/http-types-rs">
       API Docs
     </a>
     <span> | </span>
-    <a href="https://github.com/http-rs/http-types/releases">
+    <a href="https://github.com/http-rs/http-types-rs/releases">
       Releases
     </a>
     <span> | </span>
-    <a href="https://github.com/http-rs/http-types/blob/main/.github/CONTRIBUTING.md">
+    <a href="https://github.com/http-rs/http-types-rs/blob/main/.github/CONTRIBUTING.md">
       Contributing
     </a>
   </h3>
@@ -43,7 +43,7 @@
 
 ## Installation
 ```sh
-$ cargo add http-types
+$ cargo add http-types-rs
 ```
 
 ## Safety
@@ -57,9 +57,9 @@ look at some of these issues:
 - [Issues labeled "good first issue"][good-first-issue]
 - [Issues labeled "help wanted"][help-wanted]
 
-[contributing]: https://github.com/http-rs/http-types/blob/main/.github/CONTRIBUTING.md
-[good-first-issue]: https://github.com/http-rs/http-types/labels/good%20first%20issue
-[help-wanted]: https://github.com/http-rs/http-types/labels/help%20wanted
+[contributing]: https://github.com/OneOfone/http-types-rs/blob/main/.github/CONTRIBUTING.md
+[good-first-issue]: https://github.com/OneOfOne/http-types-rs/labels/good%20first%20issue
+[help-wanted]: https://github.com/OneOfOne/http-types-rs/labels/help%20wanted
 
 ## License
 

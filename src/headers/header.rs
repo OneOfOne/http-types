@@ -28,16 +28,17 @@ impl<'a, 'b> Header for (&'a str, &'b str) {
     }
 
     fn header_value(&self) -> HeaderValue {
-        HeaderValue::from_bytes(self.1.to_owned().into_bytes())
-            .expect("String slice should be valid ASCII")
+        HeaderValue::from_bytes(self.1.to_owned().into_bytes()).expect("String slice should be valid ASCII")
     }
 }
 
 impl<'a, T: Header> Header for &'a T {
+    #[allow(suspicious_double_ref_op)]
     fn header_name(&self) -> HeaderName {
         self.deref().header_name()
     }
 
+    #[allow(suspicious_double_ref_op)]
     fn header_value(&self) -> HeaderValue {
         self.deref().header_value()
     }

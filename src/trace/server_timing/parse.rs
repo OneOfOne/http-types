@@ -43,10 +43,7 @@ fn parse_entry(s: &str) -> crate::Result<Metric> {
     let mut desc = None;
 
     for mut part in parts {
-        ensure!(
-            !part.is_empty(),
-            "Server timing params cannot end with a trailing `;`"
-        );
+        ensure!(!part.is_empty(), "Server timing params cannot end with a trailing `;`");
 
         part = part.trim_start();
 
@@ -62,25 +59,19 @@ fn parse_entry(s: &str) -> crate::Result<Metric> {
 
         match name {
             "dur" => {
-                let millis: f64 = value.parse().map_err(|_| {
-                        format_err!("Server timing duration params must be a valid double-precision floating-point number.")
-                    })?;
+                let millis: f64 = value
+                    .parse()
+                    .map_err(|_| format_err!("Server timing duration params must be a valid double-precision floating-point number."))?;
                 dur = Some(Duration::from_secs_f64(millis) / 1000);
             }
             "desc" => {
                 // Ensure quotes line up, and strip them from the resulting output
                 if value.starts_with('"') {
                     value = &value[1..value.len()];
-                    ensure!(
-                        value.ends_with('"'),
-                        "Server timing description params must use matching quotes"
-                    );
+                    ensure!(value.ends_with('"'), "Server timing description params must use matching quotes");
                     value = &value[0..value.len() - 1];
                 } else {
-                    ensure!(
-                        !value.ends_with('"'),
-                        "Server timing description params must use matching quotes"
-                    );
+                    ensure!(!value.ends_with('"'), "Server timing description params must use matching quotes");
                 }
                 desc = Some(value.to_string());
             }
@@ -104,24 +95,15 @@ mod test {
         // Metric name only.
         assert_entry("Server", "Server", None, None)?;
         assert_entry("Server ", "Server", None, None)?;
-        assert_entry_err(
-            "Server ;",
-            "Server timing params cannot end with a trailing `;`",
-        );
-        assert_entry_err(
-            "Server; ",
-            "Server timing params cannot end with a trailing `;`",
-        );
+        assert_entry_err("Server ;", "Server timing params cannot end with a trailing `;`");
+        assert_entry_err("Server; ", "Server timing params cannot end with a trailing `;`");
 
         // Metric name + param
         assert_entry("Server; dur=1000", "Server", Some(1000), None)?;
         assert_entry("Server; dur =1000", "Server", Some(1000), None)?;
         assert_entry("Server; dur= 1000", "Server", Some(1000), None)?;
         assert_entry("Server; dur = 1000", "Server", Some(1000), None)?;
-        assert_entry_err(
-            "Server; dur=1000;",
-            "Server timing params cannot end with a trailing `;`",
-        );
+        assert_entry_err("Server; dur=1000;", "Server timing params cannot end with a trailing `;`");
 
         // Metric name + desc
         assert_entry(r#"DB; desc="a db""#, "DB", None, Some("a db"))?;
@@ -129,22 +111,11 @@ mod test {
         assert_entry(r#"DB; desc= "a db""#, "DB", None, Some("a db"))?;
         assert_entry(r#"DB; desc = "a db""#, "DB", None, Some("a db"))?;
         assert_entry(r#"DB; desc=a_db"#, "DB", None, Some("a_db"))?;
-        assert_entry_err(
-            r#"DB; desc="db"#,
-            "Server timing description params must use matching quotes",
-        );
-        assert_entry_err(
-            "Server; desc=a_db;",
-            "Server timing params cannot end with a trailing `;`",
-        );
+        assert_entry_err(r#"DB; desc="db"#, "Server timing description params must use matching quotes");
+        assert_entry_err("Server; desc=a_db;", "Server timing params cannot end with a trailing `;`");
 
         // Metric name + dur + desc
-        assert_entry(
-            r#"Server; dur=1000; desc="a server""#,
-            "Server",
-            Some(1000),
-            Some("a server"),
-        )?;
+        assert_entry(r#"Server; dur=1000; desc="a server""#, "Server", Some(1000), Some("a server"))?;
         assert_entry_err(
             r#"Server; dur=1000; desc="a server";"#,
             "Server timing params cannot end with a trailing `;`",

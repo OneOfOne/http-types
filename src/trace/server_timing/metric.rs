@@ -60,9 +60,7 @@ impl From<Metric> for HeaderValue {
         let f = |d: Duration| d.as_secs_f64() * 1000.0;
 
         match (entry.dur, entry.desc) {
-            (Some(dur), Some(desc)) => {
-                string.push_str(&format!("; dur={}; desc=\"{}\"", f(dur), desc))
-            }
+            (Some(dur), Some(desc)) => string.push_str(&format!("; dur={}; desc=\"{}\"", f(dur), desc)),
             (Some(dur), None) => string.push_str(&format!("; dur={}", f(dur))),
             (None, Some(desc)) => string.push_str(&format!("; desc=\"{}\"", desc)),
             (None, None) => {}
