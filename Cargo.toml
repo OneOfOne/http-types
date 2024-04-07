@@ -28,12 +28,18 @@ rustdoc-args = ["--cfg", "feature=\"docs\""]
 default = ["fs", "cookie-secure", "serde"]
 docs = ["unstable"]
 unstable = []
-hyperium_http = ["http"]
+hyperium_http = ["dep:http"]
 async_std = ["fs"]
-cookies = ["cookie"]
+cookies = ["dep:cookie"]
 cookie-secure = ["cookies", "cookie/secure"]
-fs = ["async-std"]
-serde = ["serde_qs", "dep:serde", "serde_json", "serde_urlencoded", "url/serde"]
+fs = ["dep:async-std"]
+serde = [
+	"dep:serde_qs",
+	"dep:serde",
+	"dep:serde_json",
+	"dep:serde_urlencoded",
+	"url/serde",
+]
 
 [dependencies]
 fastrand = "2.0"
@@ -60,7 +66,7 @@ serde = { version = "1.0", features = [
 	"derive",
 ], optional = true, package = "serde" }
 serde_urlencoded = { version = "0.7", optional = true }
-serde_qs = { version = "0.12", optional = true }
+serde_qs = { version = "0.13", optional = true }
 
 
 [dev-dependencies]
