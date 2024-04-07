@@ -32,7 +32,7 @@ pub struct Headers {
 
 impl Headers {
     /// Create a new instance.
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self { headers: HashMap::new() }
     }
 

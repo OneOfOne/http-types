@@ -13,7 +13,7 @@ pub struct Values<'a> {
 
 impl<'a> Values<'a> {
     /// Constructor for `Headers`.
-    pub(crate) fn new(inner: hash_map::Values<'a, HeaderName, HeaderValues>) -> Self {
+    pub fn new(inner: hash_map::Values<'a, HeaderName, HeaderValues>) -> Self {
         Self {
             inner: Some(inner),
             slot: None,
@@ -22,7 +22,7 @@ impl<'a> Values<'a> {
     }
 
     /// Constructor for `HeaderValues`.
-    pub(crate) fn new_values(values: &'a HeaderValues) -> Self {
+    pub fn new_values(values: &'a HeaderValues) -> Self {
         Self {
             inner: None,
             slot: Some(values),
