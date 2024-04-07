@@ -41,6 +41,12 @@
   </h3>
 </div>
 
+## Features
+
+This is a hard fork of [http-types](https://github.com/http-rs/http-types) since it's no longer maintained. 
+
+- Updated Dependencies
+
 ## Installation
 ```sh
 $ cargo add http-types-rs
