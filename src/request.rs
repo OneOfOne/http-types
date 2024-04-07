@@ -10,7 +10,8 @@ use std::task::{Context, Poll};
 use crate::convert::{DeserializeOwned, Serialize};
 use crate::headers::{self, HeaderName, HeaderValue, HeaderValues, Headers, Names, ToHeaderValues, Values, CONTENT_TYPE};
 use crate::mime::Mime;
-use crate::trailers::{self, Trailers};
+
+use crate::transfer::{trailers, Trailers};
 use crate::{Body, Extensions, Method, Url, Version};
 
 pin_project_lite::pin_project! {
@@ -532,7 +533,7 @@ impl Request {
         self.version = version;
     }
 
-    /// Sends trailers to the a receiver.
+    /// Sends trailers to the receiver.
     pub fn send_trailers(&mut self) -> trailers::Sender {
         self.has_trailers = true;
         let sender = self.trailers_sender.take().expect("Trailers sender can only be constructed once");

@@ -11,7 +11,7 @@ use std::task::{Context, Poll};
 use crate::convert::DeserializeOwned;
 use crate::headers::{self, HeaderName, HeaderValue, HeaderValues, Headers, Names, ToHeaderValues, Values, CONTENT_TYPE};
 use crate::mime::Mime;
-use crate::trailers::{self, Trailers};
+use crate::transfer::{trailers, Trailers};
 use crate::upgrade;
 use crate::{Body, Extensions, StatusCode, Version};
 

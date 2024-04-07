@@ -23,7 +23,7 @@
 //! # async_std::task::block_on(async {
 //! #
 //! use http_types_rs::{Url, Method, Request};
-//! use http_types_rs::trailers::Trailers;
+//! use http_types_rs::transfer::Trailers;
 //! use http_types_rs::headers::{HeaderName, HeaderValue};
 //! use async_std::task;
 //! use std::str::FromStr;
@@ -76,7 +76,7 @@ impl Trailers {
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     /// #
-    /// use http_types_rs::trailers::Trailers;
+    /// use http_types_rs::transfer::Trailers;
     ///
     /// let mut trailers = Trailers::new();
     /// trailers.insert("Content-Type", "text/plain");
@@ -97,7 +97,7 @@ impl Trailers {
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     /// #
-    /// use http_types_rs::trailers::Trailers;
+    /// use http_types_rs::transfer::Trailers;
     ///
     /// let mut trailers = Trailers::new();
     /// trailers.append("Content-Type", "text/plain");
