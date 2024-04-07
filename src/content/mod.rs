@@ -12,10 +12,10 @@
 //! # Examples
 //!
 //! ```
-//! # fn main() -> http_types::Result<()> {
+//! # fn main() -> http_types_rs::Result<()> {
 //! #
-//! use http_types::content::{Accept, MediaTypeProposal};
-//! use http_types::{mime, Response};
+//! use http_types_rs::content::{Accept, MediaTypeProposal};
+//! use http_types_rs::{mime, Response};
 //!
 //! let mut accept = Accept::new();
 //! accept.push(MediaTypeProposal::new(mime::HTML, Some(0.8))?);

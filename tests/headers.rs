@@ -1,4 +1,4 @@
-// use http_types::{Response, StatusCode};
+// use http_types_rs::{Response, StatusCode};
 
 // #[test]
 // fn headers_cmp() {

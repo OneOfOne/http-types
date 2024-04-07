@@ -14,10 +14,10 @@ use crate::utils::{fmt_http_date, parse_http_date};
 /// # Examples
 ///
 /// ```no_run
-/// # fn main() -> http_types::Result<()> {
+/// # fn main() -> http_types_rs::Result<()> {
 /// #
-/// use http_types::other::RetryAfter;
-/// use http_types::Response;
+/// use http_types_rs::other::RetryAfter;
+/// use http_types_rs::Response;
 /// use std::time::{SystemTime, Duration};
 /// use async_std::task;
 ///
@@ -34,83 +34,83 @@ use crate::utils::{fmt_http_date, parse_http_date};
 /// ```
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RetryAfter {
-    inner: RetryDirective,
+	inner: RetryDirective,
 }
 
 #[allow(clippy::len_without_is_empty)]
 impl RetryAfter {
-    /// Create a new instance from a `Duration`.
-    ///
-    /// This value will be encoded over the wire as a relative offset in seconds.
-    pub fn new(dur: Duration) -> Self {
-        Self {
-            inner: RetryDirective::Duration(dur),
-        }
-    }
+	/// Create a new instance from a `Duration`.
+	///
+	/// This value will be encoded over the wire as a relative offset in seconds.
+	pub fn new(dur: Duration) -> Self {
+		Self {
+			inner: RetryDirective::Duration(dur),
+		}
+	}
 
-    /// Create a new instance from a `SystemTime` instant.
-    ///
-    /// This value will be encoded a specific `Date` over the wire.
-    pub fn new_at(at: SystemTime) -> Self {
-        Self {
-            inner: RetryDirective::SystemTime(at),
-        }
-    }
+	/// Create a new instance from a `SystemTime` instant.
+	///
+	/// This value will be encoded a specific `Date` over the wire.
+	pub fn new_at(at: SystemTime) -> Self {
+		Self {
+			inner: RetryDirective::SystemTime(at),
+		}
+	}
 
-    /// Create a new instance from headers.
-    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-        let header = match headers.as_ref().get(RETRY_AFTER) {
-            Some(headers) => headers.last(),
-            None => return Ok(None),
-        };
+	/// Create a new instance from headers.
+	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+		let header = match headers.as_ref().get(RETRY_AFTER) {
+			Some(headers) => headers.last(),
+			None => return Ok(None),
+		};
 
-        let inner = match header.as_str().parse::<u64>() {
-            Ok(dur) => RetryDirective::Duration(Duration::from_secs(dur)),
-            Err(_) => {
-                let at = parse_http_date(header.as_str())?;
-                RetryDirective::SystemTime(at)
-            }
-        };
-        Ok(Some(Self { inner }))
-    }
+		let inner = match header.as_str().parse::<u64>() {
+			Ok(dur) => RetryDirective::Duration(Duration::from_secs(dur)),
+			Err(_) => {
+				let at = parse_http_date(header.as_str())?;
+				RetryDirective::SystemTime(at)
+			}
+		};
+		Ok(Some(Self { inner }))
+	}
 
-    /// Returns the amount of time elapsed from an earlier point in time.
-    ///
-    /// # Errors
-    ///
-    /// This may return an error if the `earlier` time was after the current time.
-    pub fn duration_since(&self, earlier: SystemTime) -> Result<Duration, SystemTimeError> {
-        let at = match self.inner {
-            RetryDirective::Duration(dur) => SystemTime::now() + dur,
-            RetryDirective::SystemTime(at) => at,
-        };
+	/// Returns the amount of time elapsed from an earlier point in time.
+	///
+	/// # Errors
+	///
+	/// This may return an error if the `earlier` time was after the current time.
+	pub fn duration_since(&self, earlier: SystemTime) -> Result<Duration, SystemTimeError> {
+		let at = match self.inner {
+			RetryDirective::Duration(dur) => SystemTime::now() + dur,
+			RetryDirective::SystemTime(at) => at,
+		};
 
-        at.duration_since(earlier)
-    }
+		at.duration_since(earlier)
+	}
 }
 
 impl Header for RetryAfter {
-    fn header_name(&self) -> HeaderName {
-        RETRY_AFTER
-    }
+	fn header_name(&self) -> HeaderName {
+		RETRY_AFTER
+	}
 
-    fn header_value(&self) -> HeaderValue {
-        let output = match self.inner {
-            RetryDirective::Duration(dur) => format!("{}", dur.as_secs()),
-            RetryDirective::SystemTime(at) => fmt_http_date(at),
-        };
-        // SAFETY: the internal string is validated to be ASCII.
-        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-    }
+	fn header_value(&self) -> HeaderValue {
+		let output = match self.inner {
+			RetryDirective::Duration(dur) => format!("{}", dur.as_secs()),
+			RetryDirective::SystemTime(at) => fmt_http_date(at),
+		};
+		// SAFETY: the internal string is validated to be ASCII.
+		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+	}
 }
 
 impl From<RetryAfter> for SystemTime {
-    fn from(retry_after: RetryAfter) -> Self {
-        match retry_after.inner {
-            RetryDirective::Duration(dur) => SystemTime::now() + dur,
-            RetryDirective::SystemTime(at) => at,
-        }
-    }
+	fn from(retry_after: RetryAfter) -> Self {
+		match retry_after.inner {
+			RetryDirective::Duration(dur) => SystemTime::now() + dur,
+			RetryDirective::SystemTime(at) => at,
+		}
+	}
 }
 
 /// What value are we decoding into?
@@ -119,47 +119,44 @@ impl From<RetryAfter> for SystemTime {
 /// value that tells them how long to wait for before trying again.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 enum RetryDirective {
-    Duration(Duration),
-    SystemTime(SystemTime),
+	Duration(Duration),
+	SystemTime(SystemTime),
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::headers::Headers;
+	use super::*;
+	use crate::headers::Headers;
 
-    #[test]
-    fn smoke() -> crate::Result<()> {
-        let retry = RetryAfter::new(Duration::from_secs(10));
+	#[test]
+	fn smoke() -> crate::Result<()> {
+		let retry = RetryAfter::new(Duration::from_secs(10));
 
-        let mut headers = Headers::new();
-        retry.apply_header(&mut headers);
+		let mut headers = Headers::new();
+		retry.apply_header(&mut headers);
 
-        // `SystemTime::now` uses sub-second precision which means there's some
-        // offset that's not encoded.
-        let now = SystemTime::now();
-        let retry = RetryAfter::from_headers(headers)?.unwrap();
-        assert_eq!(
-            retry.duration_since(now)?.as_secs(),
-            Duration::from_secs(10).as_secs()
-        );
-        Ok(())
-    }
+		// `SystemTime::now` uses sub-second precision which means there's some
+		// offset that's not encoded.
+		let now = SystemTime::now();
+		let retry = RetryAfter::from_headers(headers)?.unwrap();
+		assert_eq!(retry.duration_since(now)?.as_secs(), Duration::from_secs(10).as_secs());
+		Ok(())
+	}
 
-    #[test]
-    fn new_at() -> crate::Result<()> {
-        let now = SystemTime::now();
-        let retry = RetryAfter::new_at(now + Duration::from_secs(10));
+	#[test]
+	fn new_at() -> crate::Result<()> {
+		let now = SystemTime::now();
+		let retry = RetryAfter::new_at(now + Duration::from_secs(10));
 
-        let mut headers = Headers::new();
-        retry.apply_header(&mut headers);
+		let mut headers = Headers::new();
+		retry.apply_header(&mut headers);
 
-        // `SystemTime::now` uses sub-second precision which means there's some
-        // offset that's not encoded.
-        let retry = RetryAfter::from_headers(headers)?.unwrap();
-        let delta = retry.duration_since(now)?;
-        assert!(delta >= Duration::from_secs(9));
-        assert!(delta <= Duration::from_secs(10));
-        Ok(())
-    }
+		// `SystemTime::now` uses sub-second precision which means there's some
+		// offset that's not encoded.
+		let retry = RetryAfter::from_headers(headers)?.unwrap();
+		let delta = retry.duration_since(now)?;
+		assert!(delta >= Duration::from_secs(9));
+		assert!(delta <= Duration::from_secs(10));
+		Ok(())
+	}
 }

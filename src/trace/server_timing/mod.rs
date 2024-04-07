@@ -3,10 +3,10 @@
 //! # Examples
 //!
 //! ```
-//! # fn main() -> http_types::Result<()> {
+//! # fn main() -> http_types_rs::Result<()> {
 //! #
-//! use http_types::Response;
-//! use http_types::trace::{ServerTiming, Metric};
+//! use http_types_rs::Response;
+//! use http_types_rs::trace::{ServerTiming, Metric};
 //!
 //! let mut timings = ServerTiming::new();
 //! timings.push(Metric::new("server".to_owned(), None, None)?);
@@ -43,10 +43,10 @@ use crate::headers::{Header, HeaderName, HeaderValue, Headers, SERVER_TIMING};
 /// # Examples
 ///
 /// ```
-/// # fn main() -> http_types::Result<()> {
+/// # fn main() -> http_types_rs::Result<()> {
 /// #
-/// use http_types::Response;
-/// use http_types::trace::{ServerTiming, Metric};
+/// use http_types_rs::Response;
+/// use http_types_rs::trace::{ServerTiming, Metric};
 ///
 /// let mut timings = ServerTiming::new();
 /// timings.push(Metric::new("server".to_owned(), None, None)?);
@@ -62,198 +62,194 @@ use crate::headers::{Header, HeaderName, HeaderValue, Headers, SERVER_TIMING};
 /// ```
 #[derive(Debug)]
 pub struct ServerTiming {
-    timings: Vec<Metric>,
+	timings: Vec<Metric>,
 }
 
 impl ServerTiming {
-    /// Create a new instance of `ServerTiming`.
-    pub fn new() -> Self {
-        Self { timings: vec![] }
-    }
+	/// Create a new instance of `ServerTiming`.
+	pub fn new() -> Self {
+		Self { timings: vec![] }
+	}
 
-    /// Create a new instance from headers.
-    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-        let mut timings = vec![];
-        let headers = match headers.as_ref().get(SERVER_TIMING) {
-            Some(headers) => headers,
-            None => return Ok(None),
-        };
+	/// Create a new instance from headers.
+	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+		let mut timings = vec![];
+		let headers = match headers.as_ref().get(SERVER_TIMING) {
+			Some(headers) => headers,
+			None => return Ok(None),
+		};
 
-        for value in headers {
-            parse_header(value.as_str(), &mut timings)?;
-        }
-        Ok(Some(Self { timings }))
-    }
+		for value in headers {
+			parse_header(value.as_str(), &mut timings)?;
+		}
+		Ok(Some(Self { timings }))
+	}
 
-    /// Push an entry into the list of entries.
-    pub fn push(&mut self, entry: Metric) {
-        self.timings.push(entry);
-    }
+	/// Push an entry into the list of entries.
+	pub fn push(&mut self, entry: Metric) {
+		self.timings.push(entry);
+	}
 
-    /// An iterator visiting all server timings.
-    pub fn iter(&self) -> Iter<'_> {
-        Iter {
-            inner: self.timings.iter(),
-        }
-    }
+	/// An iterator visiting all server timings.
+	pub fn iter(&self) -> Iter<'_> {
+		Iter { inner: self.timings.iter() }
+	}
 
-    /// An iterator visiting all server timings.
-    pub fn iter_mut(&mut self) -> IterMut<'_> {
-        IterMut {
-            inner: self.timings.iter_mut(),
-        }
-    }
+	/// An iterator visiting all server timings.
+	pub fn iter_mut(&mut self) -> IterMut<'_> {
+		IterMut {
+			inner: self.timings.iter_mut(),
+		}
+	}
 }
 
 impl Header for ServerTiming {
-    fn header_name(&self) -> HeaderName {
-        SERVER_TIMING
-    }
+	fn header_name(&self) -> HeaderName {
+		SERVER_TIMING
+	}
 
-    fn header_value(&self) -> HeaderValue {
-        let mut output = String::new();
-        for (n, timing) in self.timings.iter().enumerate() {
-            let timing: HeaderValue = timing.clone().into();
-            match n {
-                0 => write!(output, "{}", timing).unwrap(),
-                _ => write!(output, ", {}", timing).unwrap(),
-            };
-        }
+	fn header_value(&self) -> HeaderValue {
+		let mut output = String::new();
+		for (n, timing) in self.timings.iter().enumerate() {
+			let timing: HeaderValue = timing.clone().into();
+			match n {
+				0 => write!(output, "{}", timing).unwrap(),
+				_ => write!(output, ", {}", timing).unwrap(),
+			};
+		}
 
-        // SAFETY: the internal string is validated to be ASCII.
-        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-    }
+		// SAFETY: the internal string is validated to be ASCII.
+		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+	}
 }
 
 impl IntoIterator for ServerTiming {
-    type Item = Metric;
-    type IntoIter = IntoIter;
+	type Item = Metric;
+	type IntoIter = IntoIter;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        IntoIter {
-            inner: self.timings.into_iter(),
-        }
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		IntoIter {
+			inner: self.timings.into_iter(),
+		}
+	}
 }
 
 impl<'a> IntoIterator for &'a ServerTiming {
-    type Item = &'a Metric;
-    type IntoIter = Iter<'a>;
+	type Item = &'a Metric;
+	type IntoIter = Iter<'a>;
 
-    // #[inline]serv
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
+	// #[inline]serv
+	fn into_iter(self) -> Self::IntoIter {
+		self.iter()
+	}
 }
 
 impl<'a> IntoIterator for &'a mut ServerTiming {
-    type Item = &'a mut Metric;
-    type IntoIter = IterMut<'a>;
+	type Item = &'a mut Metric;
+	type IntoIter = IterMut<'a>;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter_mut()
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		self.iter_mut()
+	}
 }
 
 /// A borrowing iterator over entries in `ServerTiming`.
 #[derive(Debug)]
 pub struct IntoIter {
-    inner: std::vec::IntoIter<Metric>,
+	inner: std::vec::IntoIter<Metric>,
 }
 
 impl Iterator for IntoIter {
-    type Item = Metric;
+	type Item = Metric;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 /// A lending iterator over entries in `ServerTiming`.
 #[derive(Debug)]
 pub struct Iter<'a> {
-    inner: slice::Iter<'a, Metric>,
+	inner: slice::Iter<'a, Metric>,
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = &'a Metric;
+	type Item = &'a Metric;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 /// A mutable iterator over entries in `ServerTiming`.
 #[derive(Debug)]
 pub struct IterMut<'a> {
-    inner: slice::IterMut<'a, Metric>,
+	inner: slice::IterMut<'a, Metric>,
 }
 
 impl<'a> Iterator for IterMut<'a> {
-    type Item = &'a mut Metric;
+	type Item = &'a mut Metric;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::headers::Headers;
+	use super::*;
+	use crate::headers::Headers;
 
-    #[test]
-    fn smoke() -> crate::Result<()> {
-        let mut timings = ServerTiming::new();
-        timings.push(Metric::new("server".to_owned(), None, None)?);
+	#[test]
+	fn smoke() -> crate::Result<()> {
+		let mut timings = ServerTiming::new();
+		timings.push(Metric::new("server".to_owned(), None, None)?);
 
-        let mut headers = Headers::new();
-        timings.apply_header(&mut headers);
+		let mut headers = Headers::new();
+		timings.apply_header(&mut headers);
 
-        let timings = ServerTiming::from_headers(headers)?.unwrap();
-        let entry = timings.iter().next().unwrap();
-        assert_eq!(entry.name(), "server");
-        Ok(())
-    }
+		let timings = ServerTiming::from_headers(headers)?.unwrap();
+		let entry = timings.iter().next().unwrap();
+		assert_eq!(entry.name(), "server");
+		Ok(())
+	}
 
-    #[test]
-    fn to_header_values() -> crate::Result<()> {
-        let mut timings = ServerTiming::new();
-        timings.push(Metric::new("server".to_owned(), None, None)?);
+	#[test]
+	fn to_header_values() -> crate::Result<()> {
+		let mut timings = ServerTiming::new();
+		timings.push(Metric::new("server".to_owned(), None, None)?);
 
-        let mut headers = Headers::new();
-        timings.apply_header(&mut headers);
+		let mut headers = Headers::new();
+		timings.apply_header(&mut headers);
 
-        let timings = ServerTiming::from_headers(headers)?.unwrap();
-        let entry = timings.iter().next().unwrap();
-        assert_eq!(entry.name(), "server");
-        Ok(())
-    }
+		let timings = ServerTiming::from_headers(headers)?.unwrap();
+		let entry = timings.iter().next().unwrap();
+		assert_eq!(entry.name(), "server");
+		Ok(())
+	}
 
-    #[test]
-    fn bad_request_on_parse_error() {
-        let mut headers = Headers::new();
-        headers
-            .insert(SERVER_TIMING, "server; <nori ate your param omnom>")
-            .unwrap();
-        let err = ServerTiming::from_headers(headers).unwrap_err();
-        assert_eq!(err.status(), 400);
-    }
+	#[test]
+	fn bad_request_on_parse_error() {
+		let mut headers = Headers::new();
+		headers.insert(SERVER_TIMING, "server; <nori ate your param omnom>").unwrap();
+		let err = ServerTiming::from_headers(headers).unwrap_err();
+		assert_eq!(err.status(), 400);
+	}
 }

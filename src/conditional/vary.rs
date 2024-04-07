@@ -17,10 +17,10 @@ use std::str::FromStr;
 /// # Examples
 ///
 /// ```
-/// # fn main() -> http_types::Result<()> {
+/// # fn main() -> http_types_rs::Result<()> {
 /// #
-/// use http_types::Response;
-/// use http_types::conditional::Vary;
+/// use http_types_rs::Response;
+/// use http_types_rs::conditional::Vary;
 ///
 /// let mut entries = Vary::new();
 /// entries.push("User-Agent")?;
@@ -37,238 +37,233 @@ use std::str::FromStr;
 /// # Ok(()) }
 /// ```
 pub struct Vary {
-    entries: Vec<HeaderName>,
-    wildcard: bool,
+	entries: Vec<HeaderName>,
+	wildcard: bool,
 }
 
 impl Vary {
-    /// Create a new instance of `Vary`.
-    pub fn new() -> Self {
-        Self {
-            entries: vec![],
-            wildcard: false,
-        }
-    }
+	/// Create a new instance of `Vary`.
+	pub fn new() -> Self {
+		Self {
+			entries: vec![],
+			wildcard: false,
+		}
+	}
 
-    /// Create a new instance from headers.
-    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-        let mut entries = vec![];
-        let headers = match headers.as_ref().get(VARY) {
-            Some(headers) => headers,
-            None => return Ok(None),
-        };
+	/// Create a new instance from headers.
+	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+		let mut entries = vec![];
+		let headers = match headers.as_ref().get(VARY) {
+			Some(headers) => headers,
+			None => return Ok(None),
+		};
 
-        let mut wildcard = false;
-        for value in headers {
-            for part in value.as_str().trim().split(',') {
-                let part = part.trim();
-                if part == "*" {
-                    wildcard = true;
-                    continue;
-                }
-                let entry = HeaderName::from_str(part.trim())?;
-                entries.push(entry);
-            }
-        }
+		let mut wildcard = false;
+		for value in headers {
+			for part in value.as_str().trim().split(',') {
+				let part = part.trim();
+				if part == "*" {
+					wildcard = true;
+					continue;
+				}
+				let entry = HeaderName::from_str(part.trim())?;
+				entries.push(entry);
+			}
+		}
 
-        Ok(Some(Self { entries, wildcard }))
-    }
+		Ok(Some(Self { entries, wildcard }))
+	}
 
-    /// Returns `true` if a wildcard directive was set.
-    pub fn wildcard(&self) -> bool {
-        self.wildcard
-    }
+	/// Returns `true` if a wildcard directive was set.
+	pub fn wildcard(&self) -> bool {
+		self.wildcard
+	}
 
-    /// Set the wildcard directive.
-    pub fn set_wildcard(&mut self, wildcard: bool) {
-        self.wildcard = wildcard
-    }
+	/// Set the wildcard directive.
+	pub fn set_wildcard(&mut self, wildcard: bool) {
+		self.wildcard = wildcard
+	}
 
-    /// Push a directive into the list of entries.
-    pub fn push(&mut self, directive: impl Into<HeaderName>) -> crate::Result<()> {
-        self.entries.push(directive.into());
-        Ok(())
-    }
+	/// Push a directive into the list of entries.
+	pub fn push(&mut self, directive: impl Into<HeaderName>) -> crate::Result<()> {
+		self.entries.push(directive.into());
+		Ok(())
+	}
 
-    /// An iterator visiting all server entries.
-    pub fn iter(&self) -> Iter<'_> {
-        Iter {
-            inner: self.entries.iter(),
-        }
-    }
+	/// An iterator visiting all server entries.
+	pub fn iter(&self) -> Iter<'_> {
+		Iter { inner: self.entries.iter() }
+	}
 
-    /// An iterator visiting all server entries.
-    pub fn iter_mut(&mut self) -> IterMut<'_> {
-        IterMut {
-            inner: self.entries.iter_mut(),
-        }
-    }
+	/// An iterator visiting all server entries.
+	pub fn iter_mut(&mut self) -> IterMut<'_> {
+		IterMut {
+			inner: self.entries.iter_mut(),
+		}
+	}
 }
 
 impl Header for Vary {
-    fn header_name(&self) -> HeaderName {
-        VARY
-    }
+	fn header_name(&self) -> HeaderName {
+		VARY
+	}
 
-    fn header_value(&self) -> HeaderValue {
-        let mut output = String::new();
-        for (n, name) in self.entries.iter().enumerate() {
-            let directive: HeaderValue = name
-                .as_str()
-                .parse()
-                .expect("Could not convert a HeaderName into a HeaderValue");
-            match n {
-                0 => write!(output, "{}", directive).unwrap(),
-                _ => write!(output, ", {}", directive).unwrap(),
-            };
-        }
+	fn header_value(&self) -> HeaderValue {
+		let mut output = String::new();
+		for (n, name) in self.entries.iter().enumerate() {
+			let directive: HeaderValue = name.as_str().parse().expect("Could not convert a HeaderName into a HeaderValue");
+			match n {
+				0 => write!(output, "{}", directive).unwrap(),
+				_ => write!(output, ", {}", directive).unwrap(),
+			};
+		}
 
-        if self.wildcard {
-            match output.len() {
-                0 => write!(output, "*").unwrap(),
-                _ => write!(output, ", *").unwrap(),
-            };
-        }
+		if self.wildcard {
+			match output.len() {
+				0 => write!(output, "*").unwrap(),
+				_ => write!(output, ", *").unwrap(),
+			};
+		}
 
-        // SAFETY: the internal string is validated to be ASCII.
-        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-    }
+		// SAFETY: the internal string is validated to be ASCII.
+		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+	}
 }
 
 impl IntoIterator for Vary {
-    type Item = HeaderName;
-    type IntoIter = IntoIter;
+	type Item = HeaderName;
+	type IntoIter = IntoIter;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        IntoIter {
-            inner: self.entries.into_iter(),
-        }
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		IntoIter {
+			inner: self.entries.into_iter(),
+		}
+	}
 }
 
 impl<'a> IntoIterator for &'a Vary {
-    type Item = &'a HeaderName;
-    type IntoIter = Iter<'a>;
+	type Item = &'a HeaderName;
+	type IntoIter = Iter<'a>;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		self.iter()
+	}
 }
 
 impl<'a> IntoIterator for &'a mut Vary {
-    type Item = &'a mut HeaderName;
-    type IntoIter = IterMut<'a>;
+	type Item = &'a mut HeaderName;
+	type IntoIter = IterMut<'a>;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter_mut()
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		self.iter_mut()
+	}
 }
 
 /// A borrowing iterator over entries in `Vary`.
 #[derive(Debug)]
 pub struct IntoIter {
-    inner: std::vec::IntoIter<HeaderName>,
+	inner: std::vec::IntoIter<HeaderName>,
 }
 
 impl Iterator for IntoIter {
-    type Item = HeaderName;
+	type Item = HeaderName;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 /// A lending iterator over entries in `Vary`.
 #[derive(Debug)]
 pub struct Iter<'a> {
-    inner: slice::Iter<'a, HeaderName>,
+	inner: slice::Iter<'a, HeaderName>,
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = &'a HeaderName;
+	type Item = &'a HeaderName;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 /// A mutable iterator over entries in `Vary`.
 #[derive(Debug)]
 pub struct IterMut<'a> {
-    inner: slice::IterMut<'a, HeaderName>,
+	inner: slice::IterMut<'a, HeaderName>,
 }
 
 impl<'a> Iterator for IterMut<'a> {
-    type Item = &'a mut HeaderName;
+	type Item = &'a mut HeaderName;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 impl Debug for Vary {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut list = f.debug_list();
-        for directive in &self.entries {
-            list.entry(directive);
-        }
-        list.finish()
-    }
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let mut list = f.debug_list();
+		for directive in &self.entries {
+			list.entry(directive);
+		}
+		list.finish()
+	}
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::conditional::Vary;
-    use crate::Response;
+	use super::*;
+	use crate::conditional::Vary;
+	use crate::Response;
 
-    #[test]
-    fn smoke() -> crate::Result<()> {
-        let mut entries = Vary::new();
-        entries.push("User-Agent")?;
-        entries.push("Accept-Encoding")?;
+	#[test]
+	fn smoke() -> crate::Result<()> {
+		let mut entries = Vary::new();
+		entries.push("User-Agent")?;
+		entries.push("Accept-Encoding")?;
 
-        let mut res = Response::new(200);
-        entries.apply_header(&mut res);
+		let mut res = Response::new(200);
+		entries.apply_header(&mut res);
 
-        let entries = Vary::from_headers(res)?.unwrap();
-        let mut entries = entries.iter();
-        assert_eq!(entries.next().unwrap(), "User-Agent");
-        assert_eq!(entries.next().unwrap(), "Accept-Encoding");
-        Ok(())
-    }
+		let entries = Vary::from_headers(res)?.unwrap();
+		let mut entries = entries.iter();
+		assert_eq!(entries.next().unwrap(), "User-Agent");
+		assert_eq!(entries.next().unwrap(), "Accept-Encoding");
+		Ok(())
+	}
 
-    #[test]
-    fn wildcard() -> crate::Result<()> {
-        let mut entries = Vary::new();
-        entries.push("User-Agent")?;
-        entries.set_wildcard(true);
+	#[test]
+	fn wildcard() -> crate::Result<()> {
+		let mut entries = Vary::new();
+		entries.push("User-Agent")?;
+		entries.set_wildcard(true);
 
-        let mut res = Response::new(200);
-        entries.apply_header(&mut res);
+		let mut res = Response::new(200);
+		entries.apply_header(&mut res);
 
-        let entries = Vary::from_headers(res)?.unwrap();
-        assert!(entries.wildcard());
-        let mut entries = entries.iter();
-        assert_eq!(entries.next().unwrap(), "User-Agent");
-        Ok(())
-    }
+		let entries = Vary::from_headers(res)?.unwrap();
+		assert!(entries.wildcard());
+		let mut entries = entries.iter();
+		assert_eq!(entries.next().unwrap(), "User-Agent");
+		Ok(())
+	}
 }

@@ -1,15 +1,24 @@
 [package]
-name = "http-types"
-version = "3.0.0"
+name = "http-types-rs"
+version = "4.0.0"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/http-rs/http-types"
-documentation = "https://docs.rs/http-types"
+repository = "https://github.com/OneOfone/http-types"
+documentation = "https://docs.rs/http-types-rs"
 description = "Common types for HTTP operations."
 keywords = ["http", "types", "request", "response", "h2"]
-categories = ["asynchronous", "web-programming", "web-programming::http-client", "web-programming::http-server", "web-programming::websocket"]
-authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
+categories = [
+	"asynchronous",
+	"web-programming",
+	"web-programming::http-client",
+	"web-programming::http-server",
+	"web-programming::websocket",
+]
+authors = [
+	"Yoshua Wuyts <yoshuawuyts@gmail.com>",
+	"Ahmed Mones <oneofone@gmail.com>",
+]
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 
 [package.metadata.docs.rs]
 features = ["docs"]
@@ -24,34 +33,36 @@ async_std = ["fs"]
 cookies = ["cookie"]
 cookie-secure = ["cookies", "cookie/secure"]
 fs = ["async-std"]
-serde = ["serde_qs", "serde_crate", "serde_json", "serde_urlencoded", "url/serde"]
+serde = ["serde_qs", "dep:serde", "serde_json", "serde_urlencoded", "url/serde"]
 
 [dependencies]
-fastrand = "1.4.0"
-base64 = "0.13.0"
-futures-lite = "1.11.1"
-async-channel = "1.5.1"
-infer = "0.7.0"
-pin-project-lite = "0.2.0"
-url = "2.1.1"
-anyhow = "1.0.26"
+fastrand = "2.0"
+base64 = "0.22"
+futures = "0.3"
+async-channel = "2.2"
+infer = "0.15"
+pin-project-lite = "0.2"
+url = "2.5"
+anyhow = "1.0"
 
 # features: async_std
-async-std = { version = "1.6.0", optional = true }
+async-std = { version = "1.12", optional = true }
 
 # features: hyperium/http
-http = { version = "0.2.0", optional = true }
+http = { version = "1.1", optional = true }
 
 # features: cookies
-cookie = { version = "0.16.0", features = ["percent-encode"], optional = true }
+cookie = { version = "0.18", features = ["percent-encode"], optional = true }
 
 # features: serde
-serde_json = { version = "1.0.51", optional = true }
-serde_crate = { version = "1.0.106", features = ["derive"], optional = true, package = "serde" }
-serde_urlencoded = { version = "0.7.0", optional = true}
-serde_qs = { version = "0.9.1", optional = true }
+serde_json = { version = "1.0", optional = true }
+serde = { version = "1.0", features = [
+	"derive",
+], optional = true, package = "serde" }
+serde_urlencoded = { version = "0.7", optional = true }
+serde_qs = { version = "0.12", optional = true }
 
 
 [dev-dependencies]
-http = "0.2.0"
-async-std = { version = "1.6.0", features = ["attributes"] }
+http = "1.1"
+async-std = { version = "1.12", features = ["attributes"] }

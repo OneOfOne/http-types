@@ -14,10 +14,10 @@ use std::fmt::Debug;
 /// # Examples
 ///
 /// ```
-/// # fn main() -> http_types::Result<()> {
+/// # fn main() -> http_types_rs::Result<()> {
 /// #
-/// use http_types::Response;
-/// use http_types::other::Expect;
+/// use http_types_rs::Response;
+/// use http_types_rs::other::Expect;
 ///
 /// let expect = Expect::new();
 ///
@@ -31,64 +31,64 @@ use std::fmt::Debug;
 /// ```
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Expect {
-    _priv: (),
+	_priv: (),
 }
 
 impl Expect {
-    /// Create a new instance of `Expect`.
-    pub fn new() -> Self {
-        Self { _priv: () }
-    }
+	/// Create a new instance of `Expect`.
+	pub fn new() -> Self {
+		Self { _priv: () }
+	}
 
-    /// Create an instance of `Expect` from a `Headers` instance.
-    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-        let headers = match headers.as_ref().get(EXPECT) {
-            Some(headers) => headers,
-            None => return Ok(None),
-        };
+	/// Create an instance of `Expect` from a `Headers` instance.
+	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+		let headers = match headers.as_ref().get(EXPECT) {
+			Some(headers) => headers,
+			None => return Ok(None),
+		};
 
-        // If we successfully parsed the header then there's always at least one
-        // entry. We want the last entry.
-        let header = headers.iter().last().unwrap();
-        ensure_eq_status!(header, "100-continue", 400, "malformed `Expect` header");
+		// If we successfully parsed the header then there's always at least one
+		// entry. We want the last entry.
+		let header = headers.iter().last().unwrap();
+		ensure_eq_status!(header, "100-continue", 400, "malformed `Expect` header");
 
-        Ok(Some(Self { _priv: () }))
-    }
+		Ok(Some(Self { _priv: () }))
+	}
 }
 
 impl Header for Expect {
-    fn header_name(&self) -> HeaderName {
-        EXPECT
-    }
-    fn header_value(&self) -> HeaderValue {
-        let value = "100-continue";
-        // SAFETY: the internal string is validated to be ASCII.
-        unsafe { HeaderValue::from_bytes_unchecked(value.into()) }
-    }
+	fn header_name(&self) -> HeaderName {
+		EXPECT
+	}
+	fn header_value(&self) -> HeaderValue {
+		let value = "100-continue";
+		// SAFETY: the internal string is validated to be ASCII.
+		unsafe { HeaderValue::from_bytes_unchecked(value.into()) }
+	}
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::headers::Headers;
+	use super::*;
+	use crate::headers::Headers;
 
-    #[test]
-    fn smoke() -> crate::Result<()> {
-        let expect = Expect::new();
+	#[test]
+	fn smoke() -> crate::Result<()> {
+		let expect = Expect::new();
 
-        let mut headers = Headers::new();
-        expect.apply_header(&mut headers);
+		let mut headers = Headers::new();
+		expect.apply_header(&mut headers);
 
-        let expect = Expect::from_headers(headers)?.unwrap();
-        assert_eq!(expect, Expect::new());
-        Ok(())
-    }
+		let expect = Expect::from_headers(headers)?.unwrap();
+		assert_eq!(expect, Expect::new());
+		Ok(())
+	}
 
-    #[test]
-    fn bad_request_on_parse_error() {
-        let mut headers = Headers::new();
-        headers.insert(EXPECT, "<nori ate the tag. yum.>").unwrap();
-        let err = Expect::from_headers(headers).unwrap_err();
-        assert_eq!(err.status(), 400);
-    }
+	#[test]
+	fn bad_request_on_parse_error() {
+		let mut headers = Headers::new();
+		headers.insert(EXPECT, "<nori ate the tag. yum.>").unwrap();
+		let err = Expect::from_headers(headers).unwrap_err();
+		assert_eq!(err.status(), 400);
+	}
 }

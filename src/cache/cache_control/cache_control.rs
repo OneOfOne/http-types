@@ -13,10 +13,10 @@ use std::slice;
 /// # Examples
 ///
 /// ```
-/// # fn main() -> http_types::Result<()> {
+/// # fn main() -> http_types_rs::Result<()> {
 /// #
-/// use http_types::Response;
-/// use http_types::cache::{CacheControl, CacheDirective};
+/// use http_types_rs::Response;
+/// use http_types_rs::cache::{CacheControl, CacheDirective};
 /// let mut entries = CacheControl::new();
 /// entries.push(CacheDirective::Immutable);
 /// entries.push(CacheDirective::NoStore);
@@ -32,169 +32,167 @@ use std::slice;
 /// # Ok(()) }
 /// ```
 pub struct CacheControl {
-    entries: Vec<CacheDirective>,
+	entries: Vec<CacheDirective>,
 }
 
 impl CacheControl {
-    /// Create a new instance of `CacheControl`.
-    pub fn new() -> Self {
-        Self { entries: vec![] }
-    }
+	/// Create a new instance of `CacheControl`.
+	pub fn new() -> Self {
+		Self { entries: vec![] }
+	}
 
-    /// Create a new instance from headers.
-    pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
-        let mut entries = vec![];
-        let headers = match headers.as_ref().get(CACHE_CONTROL) {
-            Some(headers) => headers,
-            None => return Ok(None),
-        };
+	/// Create a new instance from headers.
+	pub fn from_headers(headers: impl AsRef<Headers>) -> crate::Result<Option<Self>> {
+		let mut entries = vec![];
+		let headers = match headers.as_ref().get(CACHE_CONTROL) {
+			Some(headers) => headers,
+			None => return Ok(None),
+		};
 
-        for value in headers {
-            for part in value.as_str().trim().split(',') {
-                // Try and parse a directive from a str. If the directive is
-                // unkown we skip it.
-                if let Some(entry) = CacheDirective::from_str(part)? {
-                    entries.push(entry);
-                }
-            }
-        }
+		for value in headers {
+			for part in value.as_str().trim().split(',') {
+				// Try and parse a directive from a str. If the directive is
+				// unkown we skip it.
+				if let Some(entry) = CacheDirective::from_str(part)? {
+					entries.push(entry);
+				}
+			}
+		}
 
-        Ok(Some(Self { entries }))
-    }
-    /// Push a directive into the list of entries.
-    pub fn push(&mut self, directive: CacheDirective) {
-        self.entries.push(directive);
-    }
+		Ok(Some(Self { entries }))
+	}
+	/// Push a directive into the list of entries.
+	pub fn push(&mut self, directive: CacheDirective) {
+		self.entries.push(directive);
+	}
 
-    /// An iterator visiting all server entries.
-    pub fn iter(&self) -> Iter<'_> {
-        Iter {
-            inner: self.entries.iter(),
-        }
-    }
+	/// An iterator visiting all server entries.
+	pub fn iter(&self) -> Iter<'_> {
+		Iter { inner: self.entries.iter() }
+	}
 
-    /// An iterator visiting all server entries.
-    pub fn iter_mut(&mut self) -> IterMut<'_> {
-        IterMut {
-            inner: self.entries.iter_mut(),
-        }
-    }
+	/// An iterator visiting all server entries.
+	pub fn iter_mut(&mut self) -> IterMut<'_> {
+		IterMut {
+			inner: self.entries.iter_mut(),
+		}
+	}
 }
 
 impl Header for CacheControl {
-    fn header_name(&self) -> HeaderName {
-        CACHE_CONTROL
-    }
-    fn header_value(&self) -> HeaderValue {
-        let mut output = String::new();
-        for (n, directive) in self.entries.iter().enumerate() {
-            let directive: HeaderValue = directive.clone().into();
-            match n {
-                0 => write!(output, "{}", directive).unwrap(),
-                _ => write!(output, ", {}", directive).unwrap(),
-            };
-        }
+	fn header_name(&self) -> HeaderName {
+		CACHE_CONTROL
+	}
+	fn header_value(&self) -> HeaderValue {
+		let mut output = String::new();
+		for (n, directive) in self.entries.iter().enumerate() {
+			let directive: HeaderValue = directive.clone().into();
+			match n {
+				0 => write!(output, "{}", directive).unwrap(),
+				_ => write!(output, ", {}", directive).unwrap(),
+			};
+		}
 
-        // SAFETY: the internal string is validated to be ASCII.
-        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-    }
+		// SAFETY: the internal string is validated to be ASCII.
+		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+	}
 }
 
 impl IntoIterator for CacheControl {
-    type Item = CacheDirective;
-    type IntoIter = IntoIter;
+	type Item = CacheDirective;
+	type IntoIter = IntoIter;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        IntoIter {
-            inner: self.entries.into_iter(),
-        }
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		IntoIter {
+			inner: self.entries.into_iter(),
+		}
+	}
 }
 
 impl<'a> IntoIterator for &'a CacheControl {
-    type Item = &'a CacheDirective;
-    type IntoIter = Iter<'a>;
+	type Item = &'a CacheDirective;
+	type IntoIter = Iter<'a>;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		self.iter()
+	}
 }
 
 impl<'a> IntoIterator for &'a mut CacheControl {
-    type Item = &'a mut CacheDirective;
-    type IntoIter = IterMut<'a>;
+	type Item = &'a mut CacheDirective;
+	type IntoIter = IterMut<'a>;
 
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter_mut()
-    }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		self.iter_mut()
+	}
 }
 
 /// A borrowing iterator over entries in `CacheControl`.
 #[derive(Debug)]
 pub struct IntoIter {
-    inner: std::vec::IntoIter<CacheDirective>,
+	inner: std::vec::IntoIter<CacheDirective>,
 }
 
 impl Iterator for IntoIter {
-    type Item = CacheDirective;
+	type Item = CacheDirective;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 /// A lending iterator over entries in `CacheControl`.
 #[derive(Debug)]
 pub struct Iter<'a> {
-    inner: slice::Iter<'a, CacheDirective>,
+	inner: slice::Iter<'a, CacheDirective>,
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = &'a CacheDirective;
+	type Item = &'a CacheDirective;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 /// A mutable iterator over entries in `CacheControl`.
 #[derive(Debug)]
 pub struct IterMut<'a> {
-    inner: slice::IterMut<'a, CacheDirective>,
+	inner: slice::IterMut<'a, CacheDirective>,
 }
 
 impl<'a> Iterator for IterMut<'a> {
-    type Item = &'a mut CacheDirective;
+	type Item = &'a mut CacheDirective;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
+	fn next(&mut self) -> Option<Self::Item> {
+		self.inner.next()
+	}
 
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.inner.size_hint()
-    }
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
 }
 
 impl Debug for CacheControl {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut list = f.debug_list();
-        for directive in &self.entries {
-            list.entry(directive);
-        }
-        list.finish()
-    }
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let mut list = f.debug_list();
+		for directive in &self.entries {
+			list.entry(directive);
+		}
+		list.finish()
+	}
 }

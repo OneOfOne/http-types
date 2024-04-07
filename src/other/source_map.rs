@@ -14,10 +14,10 @@ use std::convert::TryInto;
 /// # Examples
 ///
 /// ```
-/// # fn main() -> http_types::Result<()> {
+/// # fn main() -> http_types_rs::Result<()> {
 /// #
-/// use http_types::{Response, Url};
-/// use http_types::other::SourceMap;
+/// use http_types_rs::{Response, Url};
+/// use http_types_rs::other::SourceMap;
 ///
 /// let source_map = SourceMap::new(Url::parse("https://example.net/")?);
 ///
@@ -32,125 +32,111 @@ use std::convert::TryInto;
 /// ```
 #[derive(Debug)]
 pub struct SourceMap {
-    location: Url,
+	location: Url,
 }
 
 impl SourceMap {
-    /// Create a new instance of `SourceMap` header.
-    pub fn new(location: Url) -> Self {
-        Self { location }
-    }
+	/// Create a new instance of `SourceMap` header.
+	pub fn new(location: Url) -> Self {
+		Self { location }
+	}
 
-    /// Create a new instance from headers.
-    pub fn from_headers<U>(base_url: U, headers: impl AsRef<Headers>) -> crate::Result<Option<Self>>
-    where
-        U: TryInto<Url>,
-        U::Error: std::fmt::Debug,
-    {
-        let headers = match headers.as_ref().get(SOURCE_MAP) {
-            Some(headers) => headers,
-            None => return Ok(None),
-        };
+	/// Create a new instance from headers.
+	pub fn from_headers<U>(base_url: U, headers: impl AsRef<Headers>) -> crate::Result<Option<Self>>
+	where
+		U: TryInto<Url>,
+		U::Error: std::fmt::Debug,
+	{
+		let headers = match headers.as_ref().get(SOURCE_MAP) {
+			Some(headers) => headers,
+			None => return Ok(None),
+		};
 
-        // If we successfully parsed the header then there's always at least one
-        // entry. We want the last entry.
-        let header_value = headers.iter().last().unwrap();
+		// If we successfully parsed the header then there's always at least one
+		// entry. We want the last entry.
+		let header_value = headers.iter().last().unwrap();
 
-        let url = match Url::parse(header_value.as_str()) {
-            Ok(url) => url,
-            Err(_) => match base_url.try_into() {
-                Ok(base_url) => base_url.join(header_value.as_str().trim()).status(500)?,
-                Err(_) => bail!(500, "Invalid base url provided"),
-            },
-        };
+		let url = match Url::parse(header_value.as_str()) {
+			Ok(url) => url,
+			Err(_) => match base_url.try_into() {
+				Ok(base_url) => base_url.join(header_value.as_str().trim()).status(500)?,
+				Err(_) => bail!(500, "Invalid base url provided"),
+			},
+		};
 
-        Ok(Some(Self { location: url }))
-    }
+		Ok(Some(Self { location: url }))
+	}
 
-    /// Get the url.
-    pub fn location(&self) -> &Url {
-        &self.location
-    }
+	/// Get the url.
+	pub fn location(&self) -> &Url {
+		&self.location
+	}
 
-    /// Set the url.
-    pub fn set_location<U>(&mut self, location: U) -> Result<(), U::Error>
-    where
-        U: TryInto<Url>,
-        U::Error: std::fmt::Debug,
-    {
-        self.location = location.try_into()?;
-        Ok(())
-    }
+	/// Set the url.
+	pub fn set_location<U>(&mut self, location: U) -> Result<(), U::Error>
+	where
+		U: TryInto<Url>,
+		U::Error: std::fmt::Debug,
+	{
+		self.location = location.try_into()?;
+		Ok(())
+	}
 }
 
 impl Header for SourceMap {
-    fn header_name(&self) -> HeaderName {
-        SOURCE_MAP
-    }
+	fn header_name(&self) -> HeaderName {
+		SOURCE_MAP
+	}
 
-    fn header_value(&self) -> HeaderValue {
-        let output = self.location.to_string();
+	fn header_value(&self) -> HeaderValue {
+		let output = self.location.to_string();
 
-        // SAFETY: the internal string is validated to be ASCII.
-        unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
-    }
+		// SAFETY: the internal string is validated to be ASCII.
+		unsafe { HeaderValue::from_bytes_unchecked(output.into()) }
+	}
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::headers::Headers;
+	use super::*;
+	use crate::headers::Headers;
 
-    #[test]
-    fn smoke() -> crate::Result<()> {
-        let source_map = SourceMap::new(Url::parse("https://example.net/test.json")?);
+	#[test]
+	fn smoke() -> crate::Result<()> {
+		let source_map = SourceMap::new(Url::parse("https://example.net/test.json")?);
 
-        let mut headers = Headers::new();
-        source_map.apply_header(&mut headers);
+		let mut headers = Headers::new();
+		source_map.apply_header(&mut headers);
 
-        let base_url = Url::parse("https://example.net/")?;
-        let source_map = SourceMap::from_headers(base_url, headers)?.unwrap();
-        assert_eq!(
-            source_map.location(),
-            &Url::parse("https://example.net/test.json")?
-        );
-        Ok(())
-    }
+		let base_url = Url::parse("https://example.net/")?;
+		let source_map = SourceMap::from_headers(base_url, headers)?.unwrap();
+		assert_eq!(source_map.location(), &Url::parse("https://example.net/test.json")?);
+		Ok(())
+	}
 
-    #[test]
-    fn bad_request_on_parse_error() {
-        let mut headers = Headers::new();
-        headers
-            .insert(SOURCE_MAP, "htt://<nori ate the tag. yum.>")
-            .unwrap();
-        let err = SourceMap::from_headers(Url::parse("https://example.net").unwrap(), headers)
-            .unwrap_err();
-        assert_eq!(err.status(), 500);
-    }
+	#[test]
+	fn bad_request_on_parse_error() {
+		let mut headers = Headers::new();
+		headers.insert(SOURCE_MAP, "htt://<nori ate the tag. yum.>").unwrap();
+		let err = SourceMap::from_headers(Url::parse("https://example.net").unwrap(), headers).unwrap_err();
+		assert_eq!(err.status(), 500);
+	}
 
-    #[test]
-    fn fallback_works() -> crate::Result<()> {
-        let mut headers = Headers::new();
-        headers.insert(SOURCE_MAP, "/test.json").unwrap();
+	#[test]
+	fn fallback_works() -> crate::Result<()> {
+		let mut headers = Headers::new();
+		headers.insert(SOURCE_MAP, "/test.json").unwrap();
 
-        let base_url = Url::parse("https://fallback.net/")?;
-        let source_map = SourceMap::from_headers(base_url, headers)?.unwrap();
-        assert_eq!(
-            source_map.location(),
-            &Url::parse("https://fallback.net/test.json")?
-        );
+		let base_url = Url::parse("https://fallback.net/")?;
+		let source_map = SourceMap::from_headers(base_url, headers)?.unwrap();
+		assert_eq!(source_map.location(), &Url::parse("https://fallback.net/test.json")?);
 
-        let mut headers = Headers::new();
-        headers
-            .insert(SOURCE_MAP, "https://example.com/test.json")
-            .unwrap();
+		let mut headers = Headers::new();
+		headers.insert(SOURCE_MAP, "https://example.com/test.json").unwrap();
 
-        let base_url = Url::parse("https://fallback.net/")?;
-        let source_map = SourceMap::from_headers(base_url, headers)?.unwrap();
-        assert_eq!(
-            source_map.location(),
-            &Url::parse("https://example.com/test.json")?
-        );
-        Ok(())
-    }
+		let base_url = Url::parse("https://fallback.net/")?;
+		let source_map = SourceMap::from_headers(base_url, headers)?.unwrap();
+		assert_eq!(source_map.location(), &Url::parse("https://example.com/test.json")?);
+		Ok(())
+	}
 }

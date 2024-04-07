@@ -6,9 +6,9 @@
 //! # Example
 //!
 //! ```
-//! # fn main() -> Result<(), http_types::url::ParseError> {
+//! # fn main() -> Result<(), http_types_rs::url::ParseError> {
 //! #
-//! use http_types::{Method, Request, Response, StatusCode};
+//! use http_types_rs::{Method, Request, Response, StatusCode};
 //!
 //! let mut req = Request::new(Method::Get, "https://example.com");
 //! req.set_body("Hello, Nori!");
@@ -97,22 +97,21 @@
 #![warn(missing_docs)]
 #![allow(clippy::new_without_default)]
 #![cfg_attr(backtrace, feature(backtrace))]
-#![cfg_attr(feature = "docs", feature(doc_cfg))]
+// #![cfg_attr(feature = "docs", feature(doc_cfg))]
 #![doc(html_favicon_url = "https://yoshuawuyts.com/assets/http-rs/favicon.ico")]
 #![doc(html_logo_url = "https://yoshuawuyts.com/assets/http-rs/logo-rounded.png")]
 
 /// HTTP cookies.
 #[cfg(feature = "cookies")]
 pub mod cookies {
-    pub use cookie::*;
+	pub use cookie::*;
 }
 
 /// URL records.
 pub mod url {
-    pub use url::{
-        EncodingOverride, Host, OpaqueOrigin, Origin, ParseError, ParseOptions, PathSegmentsMut,
-        Position, SyntaxViolation, Url, UrlQuery,
-    };
+	pub use url::{
+		EncodingOverride, Host, OpaqueOrigin, Origin, ParseError, ParseOptions, PathSegmentsMut, Position, SyntaxViolation, Url, UrlQuery,
+	};
 }
 
 #[macro_use]
@@ -167,23 +166,23 @@ pub use crate::extensions::Extensions;
 #[cfg(feature = "serde")]
 /// Traits for conversions between types.
 pub mod convert {
-    pub use serde_crate::{de::DeserializeOwned, Deserialize, Serialize};
-    #[doc(inline)]
-    pub use serde_json::json;
+	pub use serde::{de::DeserializeOwned, Deserialize, Serialize};
+	#[doc(inline)]
+	pub use serde_json::json;
 }
 
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-    use crate::Error;
-    pub use crate::StatusCode;
-    use core::fmt::{Debug, Display};
-    pub use core::result::Result::Err;
+	use crate::Error;
+	pub use crate::StatusCode;
+	use core::fmt::{Debug, Display};
+	pub use core::result::Result::Err;
 
-    pub fn new_adhoc<M>(message: M) -> Error
-    where
-        M: Display + Debug + Send + Sync + 'static,
-    {
-        Error::new_adhoc(message)
-    }
+	pub fn new_adhoc<M>(message: M) -> Error
+	where
+		M: Display + Debug + Send + Sync + 'static,
+	{
+		Error::new_adhoc(message)
+	}
 }
