@@ -15,17 +15,15 @@ pub struct HeaderValue {
 }
 
 impl HeaderValue {
-    /// Create a new `HeaderValue` from a Vec of ASCII bytes.
+    /// Create a new `HeaderValue` from a vec of valid ascii or utf8 bytes.
     ///
     /// # Error
     ///
     /// This function will error if the bytes is not valid ASCII.
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, Error> {
-        crate::ensure!(bytes.is_ascii(), "Bytes should be valid ASCII");
-
-        // This is permitted because ASCII is valid UTF-8, and we just checked that.
-        let string = unsafe { String::from_utf8_unchecked(bytes) };
-        Ok(Self { inner: string })
+        Ok(Self {
+            inner: String::from_utf8(bytes)?,
+        })
     }
 
     /// Converts a vector of bytes to a `HeaderValue` without checking that the string contains
@@ -74,7 +72,7 @@ impl FromStr for HeaderValue {
     ///
     /// This checks it's valid ASCII.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        crate::ensure!(s.is_ascii(), "String slice should be valid ASCII");
+        // crate::ensure!(s.is_ascii(), "String slice should be valid ASCII");
         Ok(Self { inner: String::from(s) })
     }
 }
@@ -138,5 +136,7 @@ mod tests {
     fn test_debug() {
         let header_value = HeaderValue::from_str("foo0").unwrap();
         assert_eq!(format!("{:?}", header_value), "\"foo0\"");
+        let header_value = HeaderValue::from_str("Â").unwrap();
+        assert_eq!(format!("{:?}", header_value), "\"Â\"");
     }
 }
